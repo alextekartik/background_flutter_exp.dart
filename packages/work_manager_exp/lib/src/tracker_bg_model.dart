@@ -66,17 +66,11 @@ extension CvItemListExt on ItemListResponse {
 }
 
 // Asynchronous
-class ItemUpdated {
-  late int lastChangeId;
-  @override
-  String toString() {
-    int? lastChangeId;
-    try {
-      lastChangeId = this.lastChangeId;
-    } catch (_) {}
+class ItemUpdatedResponse extends CvModelBase {
+  final lastChangeId = CvField<int>('lastChangeId');
 
-    return 'ItemUpdated($lastChangeId)';
-  }
+  @override
+  List<CvField> get fields => [lastChangeId];
 }
 
 var _inited = false;
@@ -84,6 +78,7 @@ void initTrackerBuilders() {
   if (!_inited) {
     _inited = true;
     cvAddBuilder<ItemListResponse>((_) => ItemListResponse());
+    cvAddBuilder<ItemUpdatedResponse>((_) => ItemUpdatedResponse());
     cvAddBuilder<TrackItem>((_) => TrackItem());
   }
 }

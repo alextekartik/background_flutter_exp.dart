@@ -173,9 +173,10 @@ class TrackerBgService extends AppBgServiceBase {
     }
   }
 
-  Future<ItemUpdated> onItemsUpdated(Object? param) async {
+  Future<ItemUpdatedResponse> onItemsUpdated(Object? param) async {
     var lastChangeId = param as int;
-    await itemUpdated.firstWhere((element) => element != lastChangeId);
-    return ItemUpdated()..lastChangeId = lastChangeId;
+    var value =
+        await itemUpdated.firstWhere((element) => element != lastChangeId);
+    return ItemUpdatedResponse()..lastChangeId.v = value;
   }
 }

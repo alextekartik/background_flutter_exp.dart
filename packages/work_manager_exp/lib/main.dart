@@ -247,8 +247,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                     );
                   }
                   var item = groupList[index];
-                  var timestamp = item.first.timestamp.v!;
 
+                  var timestamp = item.first.timestamp.v!;
                   var startTimestamp = DateTime.tryParse(timestamp)!;
                   var lastTimestamp =
                       DateTime.tryParse(item.last.timestamp.v!)!;
@@ -258,17 +258,28 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                   if (dotIndex != -1) {
                     durationText = durationText.substring(0, dotIndex);
                   }
+
+                  var localDateTime =
+                      startTimestamp.toLocal().toIso8601String();
+                  var dateTimeText =
+                      localDateTime.substring(0, 19).replaceAll('T', ' ');
+
                   var subtitle =
-                      '${item.length} ${item.first.groupId.v} $durationText';
+                      'Duration $durationText (${item.length} actions)';
                   return ListTile(
                     leading: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(item.first.tag.v ?? 'back'),
-                        Text(item.first.groupId.v?.toString() ?? ''),
+                        Text(
+                          item.first.tag.v ?? 'back',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        // Text(item.first.groupId.v?.toString() ?? ''),
                       ],
                     ),
-                    title: Text(timestamp),
+                    title: Text(dateTimeText),
                     subtitle: Text(subtitle),
                   );
                 });

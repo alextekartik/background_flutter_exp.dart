@@ -18,15 +18,14 @@ void trackerBgIsolate(SendPort callerSendPort) {
   }
   receivePort.listen((msg) async {
     WidgetsFlutterBinding.ensureInitialized();
-    var param = msg as ServiceCommandIn;
+    var command = ServiceCommandIn.fromEncodable(msg);
 
-    dynamic result = await service.onCommand(param.method, param.param);
-    //devPrint('result1: ${param.method} ${result.runtimeType} $result');
+    dynamic result = await service.onCommand(command.method, command.param);
     if (result is CvModel) {
       result = result.toMap();
     }
-    //devPrint('result2: ${result.runtimeType} $result');
+    // devPrint('result: ${result.runtimeType} $result');
 
-    param.sendPort.send(result);
+    command.sendPort.send(result);
   });
 }

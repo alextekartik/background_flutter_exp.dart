@@ -31,8 +31,9 @@ class TrackerBgServiceClient extends AppBgServiceClientBase {
   /// Only get if changes when changes happen
   ///
   /// Notification like scenario
-  Future<ItemUpdated> itemsUpdated(int lastChangeId) async {
-    return (await sendCommand(itemUpdatedMethod, lastChangeId) as ItemUpdated);
+  Future<ItemUpdatedResponse> itemsUpdated(int lastChangeId) async {
+    return (await sendCommand(itemUpdatedMethod, lastChangeId) as Map)
+        .cv<ItemUpdatedResponse>();
   }
 
   /// Clear oll items on the db

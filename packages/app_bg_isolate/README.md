@@ -1,6 +1,12 @@
 App flutter background isolate
 
-## Getting Started
+## General
+
+This package to create a shared bg isolate between multiple "main" isolate (same process?).
+It uses the isolate named server to find and expose the shared isolate.
+
+The shared bg isolate must respond to 'ping' command (check the timeout during detection)
+to check whether the isolate is alive and running.
 
 ### Setup
 
