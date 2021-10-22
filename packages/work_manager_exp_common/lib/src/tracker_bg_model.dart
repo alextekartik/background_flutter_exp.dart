@@ -94,7 +94,7 @@ extension CvItemListExt on ItemListResponse {
             previousItems!.add(item);
           }
         } catch (e) {
-          print('Error $e');
+          // print('Error $e');
         }
         // print('groups: ${list.length}');
         return list;

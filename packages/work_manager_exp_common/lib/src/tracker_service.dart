@@ -1,8 +1,11 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 
 import 'package:cv/cv.dart';
+import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sqflite_common/sqflite_dev.dart';
 import 'package:sqflite_common/sql.dart';
@@ -16,10 +19,12 @@ const clearItemsMethod = 'clear_items';
 const listItemsMethod = 'list_items';
 const itemUpdatedMethod = 'items_updated';
 const workOnceMethod = 'work_once';
+const pingMethod = 'ping';
 const sleepMethod = 'sleep';
 
 class TrackerService {
   final DatabaseFactory databaseFactory;
+  final String? dbDir;
   static var _i = 0;
   final _lock = Lock();
   bool isKilled = false;
@@ -44,7 +49,8 @@ class TrackerService {
       await batch.commit();
     }
 
-    var db = await databaseFactory.openDatabase('tracker.db',
+    var db = await databaseFactory.openDatabase(
+        dbDir != null ? join(dbDir!, 'tracker.db') : 'tracker.db',
         options: OpenDatabaseOptions(
             version: 6,
             onCreate: (db, version) async {
@@ -57,7 +63,7 @@ class TrackerService {
     return db;
   }();
 
-  TrackerService(this.databaseFactory);
+  TrackerService(this.databaseFactory, {this.dbDir});
 
   Future<int> getLastId(DatabaseExecutor executor) async {
     return (firstIntValue(await executor.query(itemTable,
@@ -67,7 +73,7 @@ class TrackerService {
         0);
   }
 
-  Future<ItemListResponse> onListItems() async {
+  Future<Model> onListItems() async {
     var db = await database;
     return await db.transaction((txn) async {
       var lastId = await getLastId(txn);
@@ -82,7 +88,7 @@ class TrackerService {
         ..itemsField.v = modelList;
 
       // devPrint('list: $list');
-      return list;
+      return list.toMap();
     });
   }
 
@@ -92,7 +98,6 @@ class TrackerService {
     itemUpdated.add(-1);
   }
 
-  @override
   Future<Object?> onCommand(String method, Object? param) async {
     print('onCommand($method, $param)');
     var i = ++_i;
@@ -127,18 +132,20 @@ class TrackerService {
         {
           return await onWorkOnce(param);
         }
+      case pingMethod:
+        return param;
     }
-    return false;
+    return null;
   }
 
-  Future<ItemUpdatedResponse> onItemsUpdated(Object? param) async {
+  Future<Model> onItemsUpdated(Object? param) async {
     var lastChangeId = param as int;
     var value =
         await itemUpdated.firstWhere((element) => element != lastChangeId);
-    return ItemUpdatedResponse()..lastChangeId.v = value;
+    return (ItemUpdatedResponse()..lastChangeId.v = value).toMap();
   }
 
-  Future<Map> onWorkOnce(Object? param) async {
+  Future<Model> onWorkOnce(Object? param) async {
     var request = WorkOnceRequest()..fromMap(param as Map);
     var maxDurationMs = request.durationMs.v ?? 45000;
     var tag = request.tag.v;

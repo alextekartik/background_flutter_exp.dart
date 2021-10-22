@@ -28,6 +28,5 @@ Future<GenerateIdResult> callRestGenerateId({int? delayMs}) async {
   var text = await httpClientRead(client, httpMethodGet, uri);
   var json = jsonDecode(text) as Map;
   var result = GenerateIdResult()..fromMap(json);
-  print('generated: $result');
   return result;
 }

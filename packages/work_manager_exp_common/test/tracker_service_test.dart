@@ -10,8 +10,10 @@ class _TrackerServiceClient with TrackerServiceClientMixin {
   late TrackerService service;
 
   @override
-  Future<Object?> sendCommand(String method, [Object? param]) {
-    return service.onCommand(method, param);
+  Future<Object?> sendCommand(String method, [Object? param]) async {
+    var result = await service.onCommand(method, param);
+    // print('sendCommand: ${result.runtimeType}');
+    return result;
   }
 }
 
