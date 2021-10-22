@@ -2,16 +2,13 @@ import 'package:tekartik_app_flutter_bg_isolate/bg_isolate.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp/src/import.dart';
 import 'package:work_manager_exp/src/tracker_bg_isolate.dart';
-import 'package:work_manager_exp/src/tracker_bg_model.dart';
+import 'package:work_manager_exp_common/tracker_db.dart';
+import 'package:work_manager_exp_common/tracker_service.dart';
 
 class TrackerBgServiceClient extends AppBgServiceClientBase {
   TrackerBgServiceClient()
       : super(BgIsolateContext(
             name: trackerPortName, isolateFn: trackerBgIsolate));
-
-  Future<String> ping(String message) async {
-    return (await sendCommand('ping', message)) as String;
-  }
 
   Future<void> sleep(int ms) async {
     await sendCommand('sleep', ms);
@@ -24,7 +21,6 @@ class TrackerBgServiceClient extends AppBgServiceClientBase {
   Future<ItemListResponse> listItems() async {
     var result = ((await sendCommand(listItemsMethod, null)) as Map)
         .cv<ItemListResponse>();
-    // devPrint('listItems recv ${result.runtimeType} $result');
     return result;
   }
 
@@ -32,8 +28,10 @@ class TrackerBgServiceClient extends AppBgServiceClientBase {
   ///
   /// Notification like scenario
   Future<ItemUpdatedResponse> itemsUpdated(int lastChangeId) async {
-    return (await sendCommand(itemUpdatedMethod, lastChangeId) as Map)
+    var response = (await sendCommand(itemUpdatedMethod, lastChangeId) as Map)
         .cv<ItemUpdatedResponse>();
+    // devPrint('$lastChangeId $response');
+    return response;
   }
 
   /// Clear oll items on the db

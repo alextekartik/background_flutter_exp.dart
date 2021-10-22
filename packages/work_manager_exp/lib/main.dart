@@ -6,8 +6,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp/src/import.dart';
-import 'package:work_manager_exp/src/tracker_bg_model.dart';
 import 'package:work_manager_exp/src/tracker_bg_service_client.dart';
+import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:workmanager/workmanager.dart';
 
 // Global client
@@ -15,6 +15,15 @@ var client = TrackerBgServiceClient();
 
 const periodicTaskName = 'periodicTask';
 const runOnceTaskName = 'runOnceTask';
+
+extension _StringBuffer on StringBuffer {
+  void add(Object text) {
+    if (isNotEmpty) {
+      write(', ');
+    }
+    write(text);
+  }
+}
 
 Future<void> serviceRun(String tag) async {
   var client = TrackerBgServiceClient();
@@ -179,6 +188,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
     snack(context, 'Triggered in $seconds seconds');
   }
 
+  final groupExpandedMap = <int, bool>{};
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -238,65 +249,100 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
               );
             }
             var groupList = snapshot.data!.groups.reversed.toList();
-            return ListView.builder(
-                itemCount: groupList.isEmpty ? 1 : groupList.length,
-                itemBuilder: (context, index) {
-                  if (groupList.isEmpty) {
-                    return const ListTile(
-                      title: Center(child: Text('no group data')),
-                    );
-                  }
-                  var item = groupList[index];
+            if (groupList.isEmpty) {
+              return const ListTile(
+                title: Center(child: Text('no data yet')),
+              );
+            }
+            // devPrint('groups: ${groupList.length}');
+            var groupIds = Set.from(groupList.map((group) => group.groupId));
+            groupExpandedMap
+                .removeWhere((key, value) => !groupIds.contains(key));
+            return SingleChildScrollView(
+              child: ExpansionPanelList(
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() {
+                    groupExpandedMap[groupList[index].groupId] = !isExpanded;
+                  });
+                },
+                children: groupList
+                    .map((group) => ExpansionPanel(
+                          headerBuilder: (context, isExpanded) {
+                            var timestamp = group.items.first.anyTimestamp;
+                            var startTimestamp = DateTime.tryParse(timestamp)!;
+                            var lastTimestamp = DateTime.tryParse(
+                                group.items.last.anyTimestamp)!;
+                            var durationText = lastTimestamp
+                                .difference(startTimestamp)
+                                .toString();
+                            var dotIndex = durationText.lastIndexOf('.');
+                            if (dotIndex != -1) {
+                              durationText =
+                                  durationText.substring(0, dotIndex);
+                            }
 
-                  var timestamp = item.first.timestamp.v!;
-                  var startTimestamp = DateTime.tryParse(timestamp)!;
-                  var lastTimestamp =
-                      DateTime.tryParse(item.last.timestamp.v!)!;
-                  var durationText =
-                      lastTimestamp.difference(startTimestamp).toString();
-                  var dotIndex = durationText.lastIndexOf('.');
-                  if (dotIndex != -1) {
-                    durationText = durationText.substring(0, dotIndex);
-                  }
+                            var localDateTime =
+                                startTimestamp.toLocal().toIso8601String();
+                            var dateTimeText = localDateTime
+                                .substring(0, 19)
+                                .replaceAll('T', ' ');
 
-                  var localDateTime =
-                      startTimestamp.toLocal().toIso8601String();
-                  var dateTimeText =
-                      localDateTime.substring(0, 19).replaceAll('T', ' ');
+                            var subtitle =
+                                'Duration $durationText (${group.items.length} actions)';
+                            return ListTile(
+                              leading: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    group.items.first.tag.v ?? 'back',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  // Text(item.first.groupId.v?.toString() ?? ''),
+                                ],
+                              ),
+                              title: Text(dateTimeText),
+                              subtitle: Text(subtitle),
+                            );
+                          },
+                          body: Column(
+                              children: group.items.map(
+                            (item) {
+                              String dateTimeText;
+                              try {
+                                dateTimeText = DateTime.parse(item.anyTimestamp)
+                                    .toLocal()
+                                    .toIso8601String()
+                                    .substring(11, 19);
+                              } catch (_) {
+                                dateTimeText = '<none>';
+                              }
+                              var sb = StringBuffer();
+                              sb.add(dateTimeText);
 
-                  var subtitle =
-                      'Duration $durationText (${item.length} actions)';
-                  return ListTile(
-                    leading: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          item.first.tag.v ?? 'back',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        // Text(item.first.groupId.v?.toString() ?? ''),
-                      ],
-                    ),
-                    title: Text(dateTimeText),
-                    subtitle: Text(subtitle),
-                  );
-                });
-            /*
-            var list = snapshot.data!.items;
-
-            return ListView.builder(
-                itemCount: list.isEmpty ? 1 : list.length,
-                itemBuilder: (context, index) {
-                  if (list.isEmpty) {
-                    return const ListTile(
-                      title: Center(child: Text('no data')),
-                    );
-                  }
-                  var item = list[index];
-                  return ListTile(title: Text(item.timestamp.v!));
-                });*/
+                              var title = sb.toString();
+                              sb = StringBuffer();
+                              sb
+                                ..add('pid: ${item.processId.v}')
+                                ..add('isolate: ${item.isolateName.v}');
+                              var subtitle = sb.toString();
+                              return ListTile(
+                                dense: true,
+                                leading: const SizedBox(
+                                  width: 32,
+                                ),
+                                title: Text(title),
+                                subtitle: Text(subtitle),
+                              );
+                            },
+                          ).toList()),
+                          isExpanded: groupExpandedMap[group.groupId] ??= false,
+                        ))
+                    .toList(),
+              ),
+            );
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: _workOnce,

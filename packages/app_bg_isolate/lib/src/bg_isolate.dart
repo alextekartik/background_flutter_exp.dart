@@ -1,5 +1,6 @@
 // Copied from https://github.com/simolus3/moor/issues/399
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:ui';
 
 class Log {
@@ -117,7 +118,8 @@ class BgIsolateClient {
   static Future<SendPort> _assignCurrentIsolate(
       {required BgIsolateContext context}) async {
     final rp = ReceivePort();
-    context.isolateFn(rp.sendPort);
+    await Isolate.spawn(context.isolateFn, rp.sendPort,
+        debugName: 'bg_isolate_${Random().nextInt(10000000)}');
     return await rp.first as SendPort;
   }
 }

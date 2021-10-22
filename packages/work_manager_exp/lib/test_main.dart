@@ -1,6 +1,6 @@
 import 'package:tekartik_test_menu_flutter/test_menu_flutter.dart';
 import 'package:work_manager_exp/main.dart';
-import 'package:work_manager_exp/src/tracker_bg_model.dart';
+import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:workmanager/workmanager.dart';
 
 void main() {

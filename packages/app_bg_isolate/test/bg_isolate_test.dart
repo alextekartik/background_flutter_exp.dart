@@ -36,8 +36,6 @@ class TestService extends AppBgServiceBase {
     print('onCommand($method, $param)');
     var i = ++_i;
     switch (method) {
-      case servicePingMethod:
-        return param;
       case 'sleep':
         var duration = param as int;
         print(
@@ -53,7 +51,7 @@ class TestService extends AppBgServiceBase {
         return param;
 
       default:
-        throw UnimplementedError();
+        return await onCommand(method, param);
     }
   }
 }
