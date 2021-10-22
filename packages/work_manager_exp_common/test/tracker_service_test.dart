@@ -2,20 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 // ignore: unused_import
 import 'package:sqflite_common/sqflite_dev.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp_common/src/tracker_bg_model.dart';
 import 'package:work_manager_exp_common/src/tracker_service.dart';
-import 'package:work_manager_exp_common/src/tracker_service_client.dart';
-
-class _TrackerServiceClient with TrackerServiceClientMixin {
-  late TrackerService service;
-
-  @override
-  Future<Object?> sendCommand(String method, [Object? param]) async {
-    var result = await service.onCommand(method, param);
-    // print('sendCommand: ${result.runtimeType}');
-    return result;
-  }
-}
 
 void main() {
   sqfliteFfiInit();
@@ -24,15 +13,22 @@ void main() {
   test('service', () async {
     // databaseFactory.setLogLevel(sqfliteLogLevelVerbose);
     var service = TrackerService(databaseFactory);
-    await service.onWorkOnce((WorkOnceRequest()..durationMs.v = 10).toMap());
+    await service.workOnce(durationMs: 10);
   });
-  test('client', () async {
+  test('workOnce', () async {
     // databaseFactory.setLogLevel(sqfliteLogLevelVerbose);
     var service = TrackerService(databaseFactory);
-    var client = _TrackerServiceClient()..service = service;
-    var response =
-        await client.workOnce(WorkOnceRequest()..durationMs.v = 6000);
-    expect(response.count.v, greaterThanOrEqualTo(4));
-    expect(response.count.v, lessThanOrEqualTo(6));
+    var count = await service.workOnce(durationMs: 6000);
+    expect(count, greaterThanOrEqualTo(4));
+    expect(count, lessThanOrEqualTo(6));
+  });
+  test('workOnce cancel', () async {
+    // databaseFactory.setLogLevel(sqfliteLogLevelVerbose);
+    var service = TrackerService(databaseFactory);
+    sleep(10000).then((_) => service.isKilled = true).unawait();
+    var count = await service.workOnce(durationMs: 60000);
+
+    expect(count, greaterThanOrEqualTo(4));
+    expect(count, lessThanOrEqualTo(6));
   });
 }

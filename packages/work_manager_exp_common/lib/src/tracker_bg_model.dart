@@ -32,48 +32,12 @@ class TrackItem extends CvModelBase {
       timestamp.v ?? localTimestamp.v ?? DateTime.now().toIso8601String();
 }
 
-class WorkOnceRequest extends CvModelBase {
-  final durationMs = CvField<int>('durationMs');
-  final tag = CvField<String>('tag');
-
-  @override
-  List<CvField> get fields => [tag, durationMs];
-}
-
-class NoResponse extends CvModelBase {
-  @override
-  List<CvField> get fields => [];
-}
-
-class WorkOnceResponse extends CvModelBase {
-  final count = CvField<int>('count');
-
-  @override
-  List<CvField> get fields => [count];
-}
-
-class ItemListResponse extends CvModelBase {
-  final itemsField = CvModelListField<TrackItem>('items');
-  final lastChangeId = CvField<int>('lastChangeId');
-
-  @override
-  List<CvField> get fields => [itemsField, lastChangeId];
-/*
-  @override
-  String toString() => '$lastChangeId ${modelList?.length}';*/
-}
-
-class TrackGroup {
+class ItemList {
   final List<TrackItem> items;
+  final int lastChangeId;
 
-  TrackGroup(this.items);
-  int get groupId => items.first.groupId.v!;
-}
+  ItemList(this.items, this.lastChangeId);
 
-extension CvItemListExt on ItemListResponse {
-  List<TrackItem> get items => itemsField.v!;
-  // List<List<TrackItem>>? _groups;
-  /// Group items by groupId
   List<TrackGroup> get groups => () {
         var list = <TrackGroup>[];
         int? previousGroupId;
@@ -101,22 +65,17 @@ extension CvItemListExt on ItemListResponse {
       }();
 }
 
-// Asynchronous
-class ItemUpdatedResponse extends CvModelBase {
-  final lastChangeId = CvField<int>('lastChangeId');
+class TrackGroup {
+  final List<TrackItem> items;
 
-  @override
-  List<CvField> get fields => [lastChangeId];
+  TrackGroup(this.items);
+  int get groupId => items.first.groupId.v!;
 }
 
 var _inited = false;
 void initTrackerBuilders() {
   if (!_inited) {
     _inited = true;
-    cvAddBuilder<ItemListResponse>((_) => ItemListResponse());
-    cvAddBuilder<ItemUpdatedResponse>((_) => ItemUpdatedResponse());
-    cvAddBuilder<WorkOnceResponse>((_) => WorkOnceResponse());
-    cvAddBuilder<WorkOnceRequest>((_) => WorkOnceRequest());
     cvAddBuilder<TrackItem>((_) => TrackItem());
   }
 }

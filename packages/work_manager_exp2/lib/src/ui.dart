@@ -5,10 +5,10 @@ import 'package:rxdart/rxdart.dart';
 import 'package:work_manager_exp2/main.dart';
 import 'package:work_manager_exp2/src/import.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
-import 'package:work_manager_exp_common/tracker_service_client.dart';
+import 'package:work_manager_exp_common/tracker_service.dart';
 import 'package:workmanager/workmanager.dart';
 
-late TrackerServiceClient client;
+late TrackerService client;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -58,7 +58,7 @@ enum MenuAction {
 }
 
 class _TrackItemListPageState extends State<TrackItemListPage> {
-  final _itemList = BehaviorSubject<ItemListResponse>();
+  final _itemList = BehaviorSubject<ItemList>();
 
   @override
   void dispose() {
@@ -71,13 +71,14 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
     sleep(0).then((_) async {
       while (mounted) {
         try {
-          var items = await client.listItems();
+          var items = await client.getListItems();
           if (!mounted) {
             return;
           }
           _itemList.add(items);
-          // ignore: unused_local_variable
-          var result = await client.itemsUpdated(items.lastChangeId.v!);
+          // Wait for modification
+          await client.onItemsUpdated
+              .firstWhere((element) => element != items.lastChangeId);
         } catch (e) {
           print(e);
         }
@@ -92,7 +93,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
   }
 
   void _workOnce() {
-    client.workOnce(WorkOnceRequest());
+    client.workOnce();
   }
 
   void snack(BuildContext context, String text) {
@@ -160,7 +161,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
           ),
         ],
       ),
-      body: StreamBuilder<ItemListResponse>(
+      body: StreamBuilder<ItemList>(
           stream: _itemList,
           // Center is a layout widget. It takes a single child and positions it
           // in the middle of the parent.

@@ -15,18 +15,10 @@ import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp_common/generate_id_rest_client.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
 
-const clearItemsMethod = 'clear_items';
-const listItemsMethod = 'list_items';
-const itemUpdatedMethod = 'items_updated';
-const workOnceMethod = 'work_once';
-const pingMethod = 'ping';
-const sleepMethod = 'sleep';
-
 class TrackerService {
   final DatabaseFactory databaseFactory;
   final String? dbDir;
-  static var _i = 0;
-  final _lock = Lock();
+
   bool isKilled = false;
 
   var itemUpdated = BehaviorSubject<int>.seeded(0);
@@ -73,7 +65,7 @@ class TrackerService {
         0);
   }
 
-  Future<Model> onListItems() async {
+  Future<ItemList> getListItems() async {
     var db = await database;
     return await db.transaction((txn) async {
       var lastId = await getLastId(txn);
@@ -83,72 +75,21 @@ class TrackerService {
           limit: 250);
       var modelList =
           result.cv<TrackItem>(builder: (_) => TrackItem()).reversed.toList();
-      var list = ItemListResponse()
-        ..lastChangeId.v = lastId
-        ..itemsField.v = modelList;
-
-      // devPrint('list: $list');
-      return list.toMap();
+      var list = ItemList(modelList, lastId);
+      return list;
     });
   }
 
-  Future<void> onClearItems() async {
+  Future<void> clearItems() async {
     var db = await database;
     await db.delete(itemTable);
     itemUpdated.add(-1);
   }
 
-  Future<Object?> onCommand(String method, Object? param) async {
-    print('onCommand($method, $param)');
-    var i = ++_i;
-    switch (method) {
-      case 'sleep':
-        print(
-            '[$i] ${DateTime.now().toIso8601String().substring(11)} request sleep($param)');
-        await _lock.synchronized(() async {
-          print(
-              '[$i] ${DateTime.now().toIso8601String().substring(11)} sleeping $param');
-          var ms = param as int;
-          await sleep(ms);
-        });
-        print(
-            '[$i] ${DateTime.now().toIso8601String().substring(11)} end sleep($param)');
-        return {};
-      case listItemsMethod:
-        {
-          return await onListItems();
-        }
-      case clearItemsMethod:
-        {
-          await onClearItems();
+  Stream<int> get onItemsUpdated => itemUpdated.stream;
 
-          return {};
-        }
-      case itemUpdatedMethod:
-        {
-          return await onItemsUpdated(param);
-        }
-      case workOnceMethod:
-        {
-          return await onWorkOnce(param);
-        }
-      case pingMethod:
-        return param;
-    }
-    return null;
-  }
-
-  Future<Model> onItemsUpdated(Object? param) async {
-    var lastChangeId = param as int;
-    var value =
-        await itemUpdated.firstWhere((element) => element != lastChangeId);
-    return (ItemUpdatedResponse()..lastChangeId.v = value).toMap();
-  }
-
-  Future<Model> onWorkOnce(Object? param) async {
-    var request = WorkOnceRequest()..fromMap(param as Map);
-    var maxDurationMs = request.durationMs.v ?? 45000;
-    var tag = request.tag.v;
+  Future<int> workOnce({String? tag, int? durationMs}) async {
+    var maxDurationMs = durationMs ?? 45000;
 
     // time * 1.5 up to 30s-45s
 
@@ -210,6 +151,6 @@ class TrackerService {
       delayMs = (delayMs * 1.5).toInt();
       count++;
     }
-    return (WorkOnceResponse()..count.v = count).toMap();
+    return count;
   }
 }

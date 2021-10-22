@@ -1,30 +1,24 @@
-App flutter background isolate
+App cross isolate mutex
 
 ## General
 
-This package to create a shared bg isolate between multiple "main" isolate (same process?).
-It uses the isolate named server to find and expose the shared isolate.
-
-The shared bg isolate must respond to 'ping' command (check the timeout during detection)
-to check whether the isolate is alive and running.
-
-The shared bg isolate must also respons to a 'kill' command to terminate itself.
+Basic cross isolate mutex.
 
 ### Setup
 
 ```yaml
 dependencies:
-  tekartik_app_flutter_bg_isolate:
+  tekartik_app_flutter_mutex:
     git:
       url: git://github.com/alextekartik/background_flutter_exp.dart
       ref: main
-      path: packages/app_bg_isolate
+      path: packages/app_mutex
     version: '>=0.2.2'
 ```
 
 ### Usage
 
-You need to declare at least a port name and an isolate entry point:
+A mutex must have a unique name for a given process
 
 ```dart
 /// The service port name.

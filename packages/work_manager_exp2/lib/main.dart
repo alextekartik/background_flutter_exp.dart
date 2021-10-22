@@ -4,12 +4,13 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:tekartik_app_flutter_mutex/mutex.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp2/src/client.dart';
 import 'package:work_manager_exp2/src/import.dart';
 import 'package:work_manager_exp2/src/ui.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
-import 'package:work_manager_exp_common/tracker_service_client.dart';
+import 'package:work_manager_exp_common/tracker_service.dart';
 import 'package:workmanager/workmanager.dart';
 
 const periodicTaskName = 'periodicTask';
@@ -17,13 +18,29 @@ const runOnceTaskName = 'runOnceTask';
 
 var _id = 0;
 
-Future<void> serviceRun(TrackerServiceClient client, String tag) async {
+Future<void> serviceBgRun(TrackerService service, String tag) async {
   //var client = TrackerServiceClient();
-  print('Workmanager starting serviceRun');
-  await client.ping('test1');
-  await client.workOnce(WorkOnceRequest()..tag.v = tag);
-  await client.ping('test2');
-  print('Workmanager ending serviceRun');
+  var mutex = Mutex(mutexName);
+  var done = false;
+  await mutex.synchronized((mutex) async {
+    // Handle cancel when main request it
+    () async {
+      while (!done) {
+        if (await mutex.getData(mainRequestKeyName) == true) {
+          service.isKilled = true;
+        }
+      }
+    }()
+        .unawait();
+
+    print('Workmanager starting serviceRun');
+    await service.workOnce();
+
+    print('Workmanager ending serviceRun');
+  }, cancel: () {
+    stdout.writeln('Bg waiting...');
+    return false;
+  }, timeout: const Duration(milliseconds: 10000));
 }
 
 void callbackDispatcher() {
@@ -33,20 +50,20 @@ void callbackDispatcher() {
     print('Workmanager task $task ${Isolate.current.debugName} $_id');
     var success = false;
     try {
-      var client = await getClient();
+      var service = await getTrackerService();
 
       switch (task) {
         case Workmanager.iOSBackgroundTask:
           stderr.writeln('The iOS background fetch was triggered');
-          await serviceRun(client, 'ios');
+          await serviceBgRun(service, 'ios');
           break;
         case periodicTaskName:
           stderr.writeln('The Android periodic triggered');
-          await serviceRun(client, 'back');
+          await serviceBgRun(service, 'back');
           break;
         case runOnceTaskName:
           stderr.writeln('The Android manually triggered');
-          await serviceRun(client, 'trig');
+          await serviceBgRun(service, 'trig');
           break;
       }
       success = true;
@@ -66,13 +83,22 @@ void initializeWorkmanager() {
       );
 }
 
+const mutexName = 'appMutex';
+const mainRequestKeyName = 'mainRequest';
 Future<void> main() async {
   _id++;
+  var mutex = Mutex(mutexName);
+  await mutex.acquire(cancel: () {
+    stdout.writeln('Main waiting...');
+    mutex.setData(mainRequestKeyName, true);
+    return false;
+  });
+  await mutex.setData(mainRequestKeyName, false);
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     sqfliteFfiInit();
   }
-  client = await getClient();
+  client = await getTrackerService();
   initTrackerBuilders();
   initializeWorkmanager();
   // Periodic task registration, android only

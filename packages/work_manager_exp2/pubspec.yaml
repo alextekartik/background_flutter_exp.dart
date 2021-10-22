@@ -30,11 +30,11 @@ dependencies:
   rxdart:
   flutter:
     sdk: flutter
-  tekartik_app_flutter_bg_isolate:
+  tekartik_app_flutter_mutex:
     git:
       url: git://github.com/tekartik/app_flutter_utils.dart
       ref: null_safety
-      path: app_bg_isolate
+      path: app_mutex
     version: '>=0.2.2'
 
 
@@ -81,9 +81,9 @@ dev_dependencies:
   flutter_lints: ^1.0.0
 
 dependency_overrides:
-  tekartik_app_flutter_bg_isolate:
+  tekartik_app_flutter_mutex:
   #  path: ../../../../github.com/tekartik/app_flutter_utils.dart/app_bg_isolate
-    path: ../app_bg_isolate
+    path: ../app_mutex
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

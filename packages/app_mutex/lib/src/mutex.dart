@@ -34,16 +34,30 @@ abstract class Mutex {
   String get name;
 
   /// Acquire
-  Future<void> acquire(bool Function() cancel);
+  ///
+  /// if timeout is reached both cancelled and timeout is set in the exception
+  Future<void> acquire({bool Function()? cancel, Duration? timeout});
 
   /// Release
   Future<void> release();
+
+  /// Used as a lock.
+  Future<T> synchronized<T>(FutureOr<T> Function(Mutex mutex) action,
+      {bool Function()? cancel, Duration? timeout});
+
+  /// Set some shared data.
+  Future<void> setData<T>(String key, T data);
+
+  /// Get some shared data.
+  Future<T> getData<T>(String key);
 }
 
 var killCommand = 'kill';
 var pingCommand = 'ping';
 var acquireCommand = 'acquire';
 var releaseCommand = 'release';
+var setCommand = 'set';
+var getCommand = 'get';
 
 /// First param is a sendport, second is the name
 void _mutexIsolate(List param) {
@@ -51,11 +65,13 @@ void _mutexIsolate(List param) {
   var callerSendPort = param[0] as SendPort;
   var name = param[1] as String;
   final receivePort = ReceivePort();
+  var data = <String, Object?>{};
   // First thing, send receivePort to caller
   receivePort.listen((message) {
     // kill is a special command without response
     if (message == killCommand) {
       Isolate.current.kill();
+      return;
     }
     var sendParam = message as List;
     var sendPort = sendParam[0] as SendPort;
@@ -78,6 +94,18 @@ void _mutexIsolate(List param) {
       } else {
         sendPort.send(false);
       }
+    } else if (param == setCommand) {
+      var key = sendParam[2] as String;
+      var value = sendParam[3];
+      if (value == null) {
+        data.remove(key);
+      } else {
+        data[key] = value;
+      }
+      sendPort.send(true);
+    } else if (param == getCommand) {
+      var key = sendParam[2] as String;
+      sendPort.send(data[key]);
     }
   });
 
@@ -107,7 +135,7 @@ class MutexImpl implements Mutex {
   }
 
   SendPort? _sendPort;
-  Future<Object?> _send(Object? param) async {
+  Future<T> _send<T>(Object? param) async {
     while (true) {
       try {
         var sendPort = _sendPort ??= await _getMutexIsolateSendPort();
@@ -116,7 +144,7 @@ class MutexImpl implements Mutex {
         var responseFuture = rp.first;
         sendPort.send([rp.sendPort, if (param is List) ...param else param]);
         var response = await responseFuture.timeout(_timeout);
-        return response;
+        return response as T;
       } catch (e) {
         if (_log.on) {
           _log.warning('$e command $param failed, try again');
@@ -171,13 +199,21 @@ class MutexImpl implements Mutex {
 
   final _acquireLock = Lock();
   @override
-  Future<void> acquire(bool Function() cancel) async {
+  Future<void> acquire({bool Function()? cancel, Duration? timeout}) async {
+    var sw = Stopwatch()..start();
     while (true) {
       var result = await _acquireLock.synchronized(() async {
-        var result = await _send([acquireCommand, clientId]) as bool;
+        var result = await _send<bool>([acquireCommand, clientId]);
         if (!result) {
-          if (cancel()) {
-            throw MutexException._(cancelled: true, message: 'cancelled');
+          if (cancel != null && cancel()) {
+            throw MutexException._(
+                cancelled: true, message: 'Acquired cancelled');
+          }
+          if (timeout != null) {
+            if (sw.elapsed.inMilliseconds > timeout.inMilliseconds) {
+              throw MutexException._(
+                  timeout: true, cancelled: true, message: 'Acquired timeout');
+            }
           }
         }
         return result;
@@ -189,22 +225,50 @@ class MutexImpl implements Mutex {
     }
   }
 
+  /// Run in critical section
+  @override
+  Future<T> synchronized<T>(FutureOr<T> Function(Mutex mutex) action,
+      {bool Function()? cancel, Duration? timeout}) async {
+    try {
+      await acquire(cancel: cancel);
+      return await action(this);
+    } finally {
+      try {
+        await release();
+      } catch (_) {}
+    }
+  }
+
   @override
   Future<void> release() async {
-    var result = await _send([releaseCommand, clientId]) as bool;
+    var result = await _send<bool>([releaseCommand, clientId]);
     if (!result) {
-      throw MutexException._(notAcquired: true, message: 'not acquired');
+      throw MutexException._(
+          notAcquired: true, message: 'Release not acquired');
     }
+  }
+
+  @override
+  Future<T> getData<T>(String key) async {
+    return (await _send<T>([getCommand, key]));
+  }
+
+  @override
+  Future<void> setData<T>(String key, T data) async {
+    await _send<bool>([setCommand, key, data]);
   }
 }
 
+/// Mutex exception during acquired.
 class MutexException implements Exception {
   final bool cancelled;
+  final bool timeout;
   final bool notAcquired;
   final String message;
 
   MutexException._(
       {this.cancelled = false,
+      this.timeout = false,
       this.notAcquired = false,
       required this.message});
   @override
