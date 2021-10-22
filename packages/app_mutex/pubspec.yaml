@@ -1,5 +1,5 @@
-name: tekartik_app_flutter_bg_isolate
-description: SImple shared background isolate
+name: tekartik_app_flutter_mutex
+description: Simple cross isolate mutex
 version: 0.0.1
 homepage:
 publish_to: none

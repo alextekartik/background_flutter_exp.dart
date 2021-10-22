@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ import 'package:workmanager/workmanager.dart';
 const periodicTaskName = 'periodicTask';
 const runOnceTaskName = 'runOnceTask';
 
+var _id = 0;
+
 Future<void> serviceRun(TrackerServiceClient client, String tag) async {
   //var client = TrackerServiceClient();
   print('Workmanager starting serviceRun');
@@ -26,7 +29,8 @@ Future<void> serviceRun(TrackerServiceClient client, String tag) async {
 void callbackDispatcher() {
   print('Workmanager callbackDispatcher()');
   Workmanager().executeTask((task, inputData) async {
-    print('Workmanager task $task');
+    _id++;
+    print('Workmanager task $task ${Isolate.current.debugName} $_id');
     var success = false;
     try {
       var client = await getClient();
@@ -63,6 +67,7 @@ void initializeWorkmanager() {
 }
 
 Future<void> main() async {
+  _id++;
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     sqfliteFfiInit();
