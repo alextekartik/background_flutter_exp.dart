@@ -77,14 +77,19 @@ class BgIsolateClient {
 
     if (lookup != null) {
       final rp = ReceivePort();
-      lookup.send(ServiceCommandIn(rp.sendPort, 'ping').toEncodable());
+      lookup
+          .send(ServiceCommandIn(rp.sendPort, servicePingMethod).toEncodable());
       try {
-        await rp.first.timeout(const Duration(milliseconds: 100));
+        // 10s timeout...
+        await rp.first.timeout(const Duration(milliseconds: 10000));
         return lookup;
       } catch (e) {
         if (_log.on) {
-          _log.warning('isolate unresponsive. Unregister and respawn');
+          _log.warning(
+              'isolate unresponsive. Force terminate, unregister and respawn');
         }
+        lookup.send(
+            ServiceCommandIn(rp.sendPort, serviceKillMethod).toEncodable());
         IsolateNameServer.removePortNameMapping(context.name);
       }
     }
@@ -137,6 +142,7 @@ ReceivePort? initIsolate(SendPort callerSendPort, String name) {
 }
 
 const servicePingMethod = 'ping';
+const serviceKillMethod = 'kill';
 
 /// In parameter
 class ServiceCommandIn {

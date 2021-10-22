@@ -8,6 +8,8 @@ It uses the isolate named server to find and expose the shared isolate.
 The shared bg isolate must respond to 'ping' command (check the timeout during detection)
 to check whether the isolate is alive and running.
 
+The shared bg isolate must also respons to a 'kill' command to terminate itself.
+
 ### Setup
 
 ```yaml

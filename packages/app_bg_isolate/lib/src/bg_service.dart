@@ -8,12 +8,28 @@ class AppBgServiceException {
   final String message;
 
   AppBgServiceException(this.message);
+
   @override
   String toString() => 'AppBgServiceException($message)';
 }
 
+/// Base services
 abstract class AppBgServiceBase {
-  Future<Object?> onCommand(String method, Object? param);
+  /// Set to false when killed by client
+  var isKilled = false;
+
+  /// Default command handling
+  Future<Object?> onCommand(String method, Object? param) async {
+    switch (method) {
+      case servicePingMethod:
+        return param;
+      case serviceKillMethod:
+        isKilled = true;
+        return null;
+      default:
+        throw UnimplementedError();
+    }
+  }
 }
 
 /// This services [sendCommand] takes care of restarting the bg isolate
@@ -54,7 +70,17 @@ class AppBgServiceClientBase {
     }
   }
 
-  Future<Object?> sendCommand(String method, Object? param) async {
+  /// Ping.
+  Future<T> ping<T>(T message) async {
+    return (await sendCommand(servicePingMethod, message)) as T;
+  }
+
+  /// Kill.
+  Future<void> kill() async {
+    await sendCommand(serviceKillMethod);
+  }
+
+  Future<Object?> sendCommand(String method, [Object? param]) async {
     try {
       return await _sendCommand(method, param);
     } catch (e, st) {
