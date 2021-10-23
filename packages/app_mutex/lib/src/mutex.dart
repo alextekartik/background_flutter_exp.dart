@@ -48,6 +48,9 @@ abstract class Mutex {
   /// Set some shared data.
   Future<void> setData<T>(String key, T data);
 
+  /// Listen to shared data changes
+  //Stream<T> onData<T>(String key)
+
   /// Get some shared data.
   Future<T> getData<T>(String key);
 }

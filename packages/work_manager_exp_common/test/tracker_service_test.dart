@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common/sqflite_dev.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
-import 'package:work_manager_exp_common/src/tracker_bg_model.dart';
+import 'package:work_manager_exp_common/src/tracker_model.dart';
 import 'package:work_manager_exp_common/src/tracker_service.dart';
 
 void main() {

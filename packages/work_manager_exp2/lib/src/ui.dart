@@ -8,7 +8,7 @@ import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:work_manager_exp_common/tracker_service.dart';
 import 'package:workmanager/workmanager.dart';
 
-late TrackerService client;
+late TrackerService service;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -55,6 +55,7 @@ enum MenuAction {
   runNow,
   runIn15s,
   runIn30s,
+  exit,
 }
 
 class _TrackItemListPageState extends State<TrackItemListPage> {
@@ -71,13 +72,13 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
     sleep(0).then((_) async {
       while (mounted) {
         try {
-          var items = await client.getListItems();
+          var items = await service.getListItems();
           if (!mounted) {
             return;
           }
           _itemList.add(items);
           // Wait for modification
-          await client.onItemsUpdated
+          await service.onItemsUpdated
               .firstWhere((element) => element != items.lastChangeId);
         } catch (e) {
           print(e);
@@ -93,7 +94,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
   }
 
   void _workOnce() {
-    client.workOnce();
+    service.workOnce(tag: tagManual);
   }
 
   void snack(BuildContext context, String text) {
@@ -133,7 +134,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                   value: MenuAction.clear,
                   child: const Text('Clear'),
                   onTap: () {
-                    client.clearItems();
+                    service.clearItems();
                   }),
               if (Platform.isAndroid) ...[
                 PopupMenuItem<MenuAction>(
@@ -156,6 +157,12 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                       _triggerIn(context, 30);
                     },
                     child: const Text('Trigger in 30s')),
+                PopupMenuItem<MenuAction>(
+                    value: MenuAction.exit,
+                    onTap: () {
+                      exit(0);
+                    },
+                    child: const Text('Exit')),
               ]
             ],
           ),

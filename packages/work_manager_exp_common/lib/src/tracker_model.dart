@@ -4,6 +4,10 @@ var trackItemModel = TrackItem();
 
 var itemTable = 'Item';
 
+var tagFront = 'front';
+var tagManual = 'ui';
+var tagBackground = 'back';
+
 class TrackItem extends CvModelBase {
   final id = CvField<int>('_id');
 

@@ -18,6 +18,7 @@ dependencies:
     version: '>=0.1.0'
   sqflite_common:
   cv:
+  flutter_local_notifications:
   rxdart:
 dev_dependencies:
   sqflite_common_ffi:

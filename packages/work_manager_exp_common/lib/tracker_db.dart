@@ -1,1 +1,1 @@
-export 'src/tracker_bg_model.dart';
+export 'src/tracker_model.dart';

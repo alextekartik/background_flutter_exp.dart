@@ -7,15 +7,15 @@ import 'package:workmanager/workmanager.dart';
 void main() {
   mainMenu(() {
     enter(() async {
-      client = await getTrackerService();
+      service = await getTrackerService();
     });
     //devPrint('MAIN_');
     item('workOnce', () async {
-      await client.workOnce();
+      await service.workOnce();
     });
     item('itemsUpdated', () async {});
     item('listItems', () async {
-      var items = (await client.getListItems()).items;
+      var items = (await service.getListItems()).items;
       for (var item in items) {
         write(
             '${item.id.v} ${item.groupId.v} ${item.genId} ${item.timestamp.v}');

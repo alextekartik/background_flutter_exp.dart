@@ -34,7 +34,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
         .unawait();
 
     print('Workmanager starting serviceRun');
-    await service.workOnce();
+    await service.workOnce(tag: tagBackground);
 
     print('Workmanager ending serviceRun');
   }, cancel: () {
@@ -79,13 +79,15 @@ void initializeWorkmanager() {
   Workmanager().initialize(
       callbackDispatcher, // The top level function, aka callbackDispatcher
       isInDebugMode:
-          isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+          false // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
       );
 }
 
 const mutexName = 'appMutex';
 const mainRequestKeyName = 'mainRequest';
 Future<void> main() async {
+  // needed if you intend to initialize in the `main` function
+  WidgetsFlutterBinding.ensureInitialized();
   _id++;
   var mutex = Mutex(mutexName);
   await mutex.acquire(cancel: () {
@@ -98,7 +100,7 @@ Future<void> main() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     sqfliteFfiInit();
   }
-  client = await getTrackerService();
+  service = await getTrackerService();
   initTrackerBuilders();
   initializeWorkmanager();
   // Periodic task registration, android only
@@ -112,6 +114,20 @@ Future<void> main() async {
       print('Error #e');
     }
   }
+
+  /// While running do every 10mn
+  ///
+  /// Until the app is killed somehow...
+  () async {
+    while (true) {
+      try {
+        await service.workOnce(tag: tagFront);
+      } catch (_) {}
+
+      await sleep(10 * 60 * 1000);
+    }
+  }()
+      .unawait();
 
   runApp(const MyApp());
 }

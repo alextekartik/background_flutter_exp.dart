@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'dart:math';
 
 import 'package:cv/cv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sqflite_common/sqflite_dev.dart';
@@ -88,7 +89,52 @@ class TrackerService {
 
   Stream<int> get onItemsUpdated => itemUpdated.stream;
 
+  Future<void> showNotification(String tag) async {
+    // initialise the plugin of flutterlocalnotifications.
+    var flip = FlutterLocalNotificationsPlugin();
+
+    // app_icon needs to be a added as a drawable
+    // resource to the Android head project.
+    var android = const AndroidInitializationSettings('ic_notification');
+    var iOS = const IOSInitializationSettings();
+
+    // initialise settings for both Android and iOS device.
+    var settings = InitializationSettings(android: android, iOS: iOS);
+    flip.initialize(settings);
+
+    var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+        'test', 'test',
+        importance: Importance.max, priority: Priority.high);
+    var iOSPlatformChannelSpecifics = const IOSNotificationDetails();
+
+    // initialise channel platform for both Android and iOS device.
+    var platformChannelSpecifics = NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: iOSPlatformChannelSpecifics);
+    await flip.show(
+      0,
+      'Notification $tag',
+      'workOnce notification',
+      platformChannelSpecifics,
+      //null
+      // payload: 'Default_Sound'
+    );
+  }
+
   Future<int> workOnce({String? tag, int? durationMs}) async {
+    tag ??= '???';
+    var future = _workOnce(tag: tag, durationMs: durationMs);
+    () async {
+      // Show a notification after max 20s
+      try {
+        await future.timeout(const Duration(seconds: 20));
+      } catch (_) {}
+      showNotification(tag!);
+    }();
+    return future;
+  }
+
+  Future<int> _workOnce({required String tag, int? durationMs}) async {
     var maxDurationMs = durationMs ?? 45000;
 
     // time * 1.5 up to 30s-45s
@@ -134,7 +180,7 @@ class TrackerService {
                   ..processId.setValue(pid)
                   ..isolateName.setValue(Isolate.current.debugName)
                   ..error.setValue(error)
-                  ..tag.setValue(tag ?? 'back')
+                  ..tag.setValue(tag)
                   ..localTimestamp.v = localTimestamp
                   ..timestamp.setValue(result?.timestamp.v))
                 .toMap());
