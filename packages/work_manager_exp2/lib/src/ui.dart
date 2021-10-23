@@ -157,13 +157,13 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                       _triggerIn(context, 30);
                     },
                     child: const Text('Trigger in 30s')),
-                PopupMenuItem<MenuAction>(
-                    value: MenuAction.exit,
-                    onTap: () {
-                      exit(0);
-                    },
-                    child: const Text('Exit')),
-              ]
+              ],
+              PopupMenuItem<MenuAction>(
+                  value: MenuAction.exit,
+                  onTap: () {
+                    exit(0);
+                  },
+                  child: const Text('Exit')),
             ],
           ),
         ],
