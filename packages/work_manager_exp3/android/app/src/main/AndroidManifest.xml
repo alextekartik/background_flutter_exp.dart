@@ -1,11 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.work_manager_exp2">
+    package="com.example.work_manager_exp3">
     <!-- Add below permission inside 'manifest' tag -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-        android:label="work_manager_exp2"
+        android:label="work_manager_exp3"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

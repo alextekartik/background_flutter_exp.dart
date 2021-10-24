@@ -7,8 +7,10 @@ import 'package:tekartik_common_utils/common_utils_import.dart';
 
 var _timeout = const Duration(milliseconds: 1000);
 
+var debugMutex = false; // devWarning(false);
+
 class Log {
-  bool on = false; // devWarning(true);
+  bool on = debugMutex; // devWarning(true);
   void warning(String s, [Object? exception, StackTrace? st]) {
     // ignore: avoid_print
     print('W $s${exception == null ? '' : '($exception)'}');
@@ -72,6 +74,10 @@ void _mutexIsolate(List param) {
   // First thing, send receivePort to caller
   receivePort.listen((message) {
     // kill is a special command without response
+    if (debugMutex) {
+      // ignore: avoid_print
+      print('/exp3 message: $message}');
+    }
     if (message == killCommand) {
       Isolate.current.kill();
       return;

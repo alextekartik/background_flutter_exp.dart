@@ -19,6 +19,12 @@ dependencies:
   sqflite_common:
   cv:
   flutter_local_notifications:
+  tekartik_app_flutter_mutex:
+    git:
+      url: git://github.com/alextekartik/background_flutter_exp.dart
+      ref: main
+      path: packages/app_mutex
+    version: '>=0.2.2'
   rxdart:
 dev_dependencies:
   sqflite_common_ffi:
@@ -26,6 +32,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^1.0.0
 
+dependency_overrides:
+  tekartik_app_flutter_mutex:
+    path: ../app_mutex
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
