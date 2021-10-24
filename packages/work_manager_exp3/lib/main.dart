@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tekartik_app_flutter_mutex/mutex.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
@@ -13,10 +14,31 @@ import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:work_manager_exp_common/tracker_service.dart';
 import 'package:workmanager/workmanager.dart';
 
+late TrackerService service;
+
 const periodicTaskName = 'periodicTask';
 const runOnceTaskName = 'runOnceTask';
 
 var _id = 0;
+var flip = FlutterLocalNotificationsPlugin();
+void requestNotificationPermissions() {
+  flip
+      .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+  flip
+      .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+}
 
 Future<void> serviceBgRun(TrackerService service, String tag) async {
   //var client = TrackerServiceClient();

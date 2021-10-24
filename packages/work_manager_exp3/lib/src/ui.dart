@@ -5,10 +5,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:work_manager_exp3/main.dart';
 import 'package:work_manager_exp3/src/import.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
-import 'package:work_manager_exp_common/tracker_service.dart';
 import 'package:workmanager/workmanager.dart';
-
-late TrackerService service;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -70,6 +67,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
   @override
   void initState() {
     sleep(0).then((_) async {
+      requestNotificationPermissions();
       while (mounted) {
         try {
           var items = await service.getListItems();

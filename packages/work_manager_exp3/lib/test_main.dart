@@ -1,7 +1,6 @@
 import 'package:tekartik_test_menu_flutter/test_menu_flutter.dart';
 import 'package:work_manager_exp3/main.dart';
 import 'package:work_manager_exp3/src/client.dart';
-import 'package:work_manager_exp3/src/ui.dart';
 import 'package:workmanager/workmanager.dart';
 
 void main() {
