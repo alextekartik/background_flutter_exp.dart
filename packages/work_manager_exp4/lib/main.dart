@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -117,6 +118,9 @@ Future<void> main() async {
   service = await getTrackerService();
   initTrackerBuilders();
   initializeWorkmanager();
+
+  /// Firebase
+  await Firebase.initializeApp();
   // Periodic task registration, android only
   if (Platform.isAndroid) {
     try {

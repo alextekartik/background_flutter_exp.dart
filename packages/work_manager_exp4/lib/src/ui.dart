@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:work_manager_exp4/main.dart';
 import 'package:work_manager_exp4/src/import.dart';
+import 'package:work_manager_exp4/src/settings_page.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -48,6 +49,7 @@ class TrackItemListPage extends StatefulWidget {
 }
 
 enum MenuAction {
+  settings,
   clear,
   runNow,
   runIn15s,
@@ -128,6 +130,17 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
         actions: [
           PopupMenuButton<MenuAction>(
             itemBuilder: (context) => [
+              PopupMenuItem<MenuAction>(
+                  value: MenuAction.settings,
+                  child: const Text('Settings'),
+                  onTap: () async {
+                    // devPrint('#1');
+                    // Navigator.of(context).pop();
+                    await Future.delayed(Duration.zero);
+                    await Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SettingsPage()));
+                    // devPrint('#2');
+                  }),
               PopupMenuItem<MenuAction>(
                   value: MenuAction.clear,
                   child: const Text('Clear'),

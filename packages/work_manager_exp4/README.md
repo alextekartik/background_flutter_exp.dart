@@ -25,8 +25,8 @@ storeFile=keystore.jks
 storePassword=<your password>
 
 ```
-- In firebase, create an android app with proper information
-- Download google-services.json to ap
+- In firebase, create an android app with proper information and required SHA1 for push to work
+- Download 'google-services.json' to `android/app/src`
 
 ## Dependencies:
 
