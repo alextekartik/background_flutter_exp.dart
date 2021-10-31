@@ -9,7 +9,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tekartik_app_flutter_mutex/mutex.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:work_manager_exp4/src/client.dart';
+import 'package:work_manager_exp4/src/globals.dart';
 import 'package:work_manager_exp4/src/import.dart';
+import 'package:work_manager_exp4/src/push_messaging_service.dart';
 import 'package:work_manager_exp4/src/ui.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:work_manager_exp_common/tracker_service.dart';
@@ -147,5 +149,43 @@ Future<void> main() async {
   }()
       .unawait();
 
+  gPushMessagingService = PushMessagingService();
+  const initializationSettingsAndroid =
+      AndroidInitializationSettings('ic_notification');
+  const initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  final notificationAppLaunchDetails = !kIsWeb && Platform.isLinux
+      ? null
+      : await gFlutterLocalNotificationsPlugin
+          .getNotificationAppLaunchDetails();
+  var payload = notificationAppLaunchDetails?.payload;
+  if (payload != null) {
+    gSelectNotificationSubject.add(payload);
+  }
+  await gFlutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String? payload) async {
+    if (payload != null) {
+      gSelectNotificationSubject.add(payload);
+    } else {
+      debugPrint('notification payload null');
+    }
+    debugPrint('notification payload: $payload');
+    Model data;
+    try {
+      data = asModel(jsonDecode(payload!) as Map);
+    } catch (_) {
+      data = newModel();
+    }
+    gAppNotificationSubject.add(data);
+  });
+  () async {
+    try {
+      await gPushMessagingService.init();
+    } catch (e) {
+      debugPrint('push amessaging init failed $e');
+    }
+  }()
+      .unawait();
   runApp(const MyApp());
 }

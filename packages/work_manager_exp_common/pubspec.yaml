@@ -26,6 +26,8 @@ dependencies:
       path: packages/app_mutex
     version: '>=0.2.2'
   rxdart:
+  firebase_messaging:
+  firebase_core:
 dev_dependencies:
   sqflite_common_ffi:
   flutter_test:

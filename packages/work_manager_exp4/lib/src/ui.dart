@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:work_manager_exp4/main.dart';
+import 'package:work_manager_exp4/src/app_notification.dart';
 import 'package:work_manager_exp4/src/import.dart';
 import 'package:work_manager_exp4/src/settings_page.dart';
 import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:workmanager/workmanager.dart';
+
+import 'globals.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -14,21 +17,23 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData.dark(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          //prim: Colors.blue,
-          ),
-      home: const TrackItemListPage(),
+    return AppNotification(
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData.dark(
+            // This is the theme of your application.
+            //
+            // Try running your application with "flutter run". You'll see the
+            // application has a blue toolbar. Then, without quitting the app, try
+            // changing the primarySwatch below to Colors.green and then invoke
+            // "hot reload" (press "r" in the console where you ran "flutter run",
+            // or simply save your changes to "hot reload" in a Flutter IDE).
+            // Notice that the counter didn't reset back to zero; the application
+            // is not restarted.
+            //prim: Colors.blue,
+            ),
+        home: const TrackItemListPage(),
+      ),
     );
   }
 }
@@ -63,11 +68,55 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
   @override
   void dispose() {
     _itemList.close();
+    _notificationSubscription?.cancel();
     super.dispose();
   }
 
+  StreamSubscription? _notificationSubscription;
+
   @override
   void initState() {
+    gPushMessagingService.init();
+    _notificationSubscription = gHomeNotificationSubject.listen((data) {
+      // devPrint('Home Received notification $data');
+      if (data == null) {
+        return;
+      }
+
+      if (mounted) {
+        /// Mark as handled
+        gHomeNotificationSubject.add(null);
+        gAppNotificationSubject.add(null);
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              // return object of type Dialog
+              return AlertDialog(
+                actionsPadding:
+                    const EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      title: const Text('Data'),
+                      subtitle: Text(jsonPretty(data) ?? ''),
+                    ),
+                  ],
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            });
+      }
+    });
+
     sleep(0).then((_) async {
       requestNotificationPermissions();
       while (mounted) {

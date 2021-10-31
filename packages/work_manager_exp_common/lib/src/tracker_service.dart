@@ -8,7 +8,6 @@ import 'package:cv/cv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:sqflite_common/sqflite_dev.dart';
 import 'package:sqflite_common/sql.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common/utils/utils.dart';
@@ -64,7 +63,7 @@ class TrackerService {
 
   late final Future<Database> _database = () async {
     // ignore: deprecated_member_use
-    await databaseFactory.setLogLevel(sqfliteLogLevelSql);
+    // await databaseFactory.setLogLevel(sqfliteLogLevelSql);
     Future<void> _onCreate(Database db) async {
       var batch = db.batch();
       batch.execute('DROP TABLE IF EXISTS $itemTable');
