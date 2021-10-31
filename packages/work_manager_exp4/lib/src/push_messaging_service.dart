@@ -5,8 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:work_manager_exp4/main.dart';
 import 'package:work_manager_exp_common/log.dart';
 
+import 'client.dart';
 import 'globals.dart';
 import 'import.dart';
 
@@ -192,6 +194,8 @@ class PushMessagingService {
           launchPushNotification = EspPushNotificationInfo(message);
         },
       );*/
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   Future<void> _initIOSPermission() async {
@@ -219,5 +223,22 @@ class PushMessagingService {
     _tokenSubject.close();
     _pushMessagingEventSubject.close();
     _tokenSubscription?.cancel();
+  }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print('Handling a background message: ${message.messageId}');
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  //await Firebase.initializeApp();
+
+  try {
+    var service = await getTrackerService();
+
+    stderr.writeln('The background notification was triggered');
+    await serviceBgRun(service, 'push');
+  } catch (e, st) {
+    print(e);
+    print(st);
   }
 }

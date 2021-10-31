@@ -33,10 +33,10 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
     }()
         .unawait();
 
-    print('Workmanager starting serviceRun');
+    print('Workmanager starting serviceRun $tag');
     await service.workOnce(tag: tagBackground);
 
-    print('Workmanager ending serviceRun');
+    print('Workmanager ending serviceRun $tag');
   }, cancel: () {
     stdout.writeln('Bg waiting...');
     return false;
