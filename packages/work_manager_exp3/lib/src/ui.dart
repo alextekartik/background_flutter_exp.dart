@@ -134,7 +134,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                   onTap: () {
                     service.clearItems();
                   }),
-              if (Platform.isAndroid) ...[
+              if (true) ...[
+                //]Platform.isAndroid) ...[
                 PopupMenuItem<MenuAction>(
                   value: MenuAction.runNow,
                   child: const Text('Trigger now'),

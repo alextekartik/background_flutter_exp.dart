@@ -75,6 +75,13 @@ void callbackDispatcher() {
           stderr.writeln('The iOS background fetch was triggered');
           await serviceBgRun(service, 'ios');
           break;
+        /*
+        case Workmanager.iOSBackgroundProcessingTask:
+          stderr.writeln('The iOS background process task was triggered');
+          await serviceBgRun(service, 'ios');
+          break;
+          ``
+         */
         case periodicTaskName:
           stderr.writeln('The Android periodic triggered');
           await serviceBgRun(service, 'back');
@@ -110,7 +117,6 @@ Future<void> main() async {
   var mutex = Mutex(mutexName);
 
   await mutex.setData(mainRequestKeyName, false);
-  WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
     sqfliteFfiInit();
   }
