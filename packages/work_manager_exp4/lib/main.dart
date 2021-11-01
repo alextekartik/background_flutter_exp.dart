@@ -152,8 +152,10 @@ Future<void> main() async {
   gPushMessagingService = PushMessagingService();
   const initializationSettingsAndroid =
       AndroidInitializationSettings('ic_notification');
+  const initializationSettingsIOS = IOSInitializationSettings();
   const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
   );
   final notificationAppLaunchDetails = !kIsWeb && Platform.isLinux
       ? null

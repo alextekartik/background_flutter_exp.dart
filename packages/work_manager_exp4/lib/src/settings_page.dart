@@ -26,6 +26,7 @@ class _SettingsPageState extends State<SettingsPage>
               title: const Text('Push token (tap to copy)'),
               subtitle: Text(token),
               onTap: () async {
+                print(token);
                 await Clipboard.setData(ClipboardData(text: token));
                 snackInfo(context, 'Copied to clipboard');
               },

@@ -167,6 +167,7 @@ class PushMessagingService {
               ),
               payload: jsonEncode(message.data));
         }
+        serviceBgRun(service, 'fg_push');
       });
     }
 
@@ -236,7 +237,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     var service = await getTrackerService();
 
     stderr.writeln('The background notification was triggered');
-    await serviceBgRun(service, 'push');
+    await serviceBgRun(service, 'bg_push');
   } catch (e, st) {
     print(e);
     print(st);

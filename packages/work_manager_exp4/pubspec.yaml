@@ -30,8 +30,6 @@ dependencies:
   rxdart:
   flutter:
     sdk: flutter
-  work_manager_exp3:
-    path: ../work_manager_exp3
   firebase_core: "^1.7.0"
   firebase_messaging: "^10.0.8"
 
