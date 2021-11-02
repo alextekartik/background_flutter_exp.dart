@@ -38,20 +38,20 @@ dependencies:
   cupertino_icons: ^1.0.2
   tekartik_test_menu_flutter:
     git:
-      url: git://github.com/tekartik/test_menu_flutter
-      ref: null_safety
+      url: https://github.com/tekartik/test_menu_flutter
+      ref: dart2_3
       path: test_menu_flutter
     version: '>=0.2.5'
   workmanager:
   tekartik_android_utils:
     git:
-      url: git://github.com/tekartik/android_utils.dart
-      ref: null_safety
+      url: https://github.com/tekartik/android_utils.dart
+      ref: dart2_3
     version: '>=0.6.0+1'
   tekartik_app_http:
     git:
-      url: git://github.com/tekartik/app_common_utils.dart
-      ref: null_safety
+      url: https://github.com/tekartik/app_common_utils.dart
+      ref: dart2_3
       path: app_http
     version: '>=0.1.0'
   sqflite_common_ffi: 2.1.0
@@ -64,8 +64,8 @@ dev_dependencies:
     sdk: flutter
   tekartik_lints_flutter:
     git:
-      url: git://github.com/tekartik/common_flutter.dart
-      ref: null_safety
+      url: https://github.com/tekartik/common_flutter.dart
+      ref: dart2_3
       path: packages/lints_flutter
     version: '>=0.1.0'
   # The "flutter_lints" package below contains a set of recommended lints to

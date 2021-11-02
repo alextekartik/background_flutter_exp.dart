@@ -10,7 +10,7 @@ Basic cross isolate mutex.
 dependencies:
   tekartik_app_flutter_mutex:
     git:
-      url: git://github.com/alextekartik/background_flutter_exp.dart
+      url: https://github.com/alextekartik/background_flutter_exp.dart
       ref: main
       path: packages/app_mutex
     version: '>=0.2.2'
