@@ -6,6 +6,7 @@ import 'package:nanoid/nanoid.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 
 var _timeout = const Duration(milliseconds: 1000);
+var _shortTimeout = const Duration(milliseconds: 10);
 
 var debugMutex = false; // devWarning(false);
 
@@ -74,9 +75,9 @@ void _mutexIsolate(List param) {
   // First thing, send receivePort to caller
   receivePort.listen((message) {
     // kill is a special command without response
-    if (debugMutex) {
+    if (_log.on) {
       // ignore: avoid_print
-      print('/exp3 message: $message}');
+      _log.info('message: $message}');
     }
     if (message == killCommand) {
       Isolate.current.kill();
@@ -165,6 +166,9 @@ class MutexImpl implements Mutex {
     }
   }
 
+  /// Look up an existing port by its mutex name.
+  ///
+  /// Ping it to see if it is alive.
   Future<SendPort> _getMutexIsolateSendPort() async {
     while (true) {
       final lookup = IsolateNameServer.lookupPortByName(name);
@@ -172,8 +176,15 @@ class MutexImpl implements Mutex {
       if (lookup != null) {
         final receivePort = ReceivePort();
         lookup.send([receivePort.sendPort, pingCommand]);
+
+        // First try with a 10ms timeout
         try {
-          // 1 second timeout
+          await receivePort.first.timeout(_shortTimeout);
+          return lookup;
+        } catch (_) {}
+
+        // 1 second timeout
+        try {
           await receivePort.first.timeout(_timeout);
           return lookup;
         } catch (e) {
