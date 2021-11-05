@@ -43,6 +43,14 @@ void requestNotificationPermissions() {
       );
 }
 
+/// Main service entry.
+///
+/// The service runs for at about 3mn if not interrupted.
+///
+/// It:
+/// - performs in loops
+///   - http fetch
+///   - sqflite transaction
 Future<void> serviceBgRun(TrackerService service, String tag) async {
   //var client = TrackerServiceClient();
   var mutex = Mutex(mutexName);

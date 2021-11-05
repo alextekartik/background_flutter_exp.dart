@@ -179,36 +179,10 @@ class PushMessagingService {
       sound: true,
     );
 
-    /*
-      // devPrint('FCM registration');
-      _firebaseMessaging.(
-        onMessage: (Map<String, dynamic> message) async {
-          _addMessage(message, PushMessagingEventType.onMessage);
-        },
-        onResume: (Map<String, dynamic> message) async {
-          _addMessage(message, PushMessagingEventType.onResume);
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          _addMessage(message, PushMessagingEventType.onLaunch);
-
-          // Save it globally to handle it right away
-          launchPushNotification = EspPushNotificationInfo(message);
-        },
-      );*/
-
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   Future<void> _initIOSPermission() async {
-    /*
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print('Settings registered: $settings');
-    });
-
-     */
     await _firebaseMessaging!.requestPermission(
       alert: true,
       announcement: false,
@@ -229,10 +203,6 @@ class PushMessagingService {
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Handling a background message: ${message.messageId}');
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  //await Firebase.initializeApp();
-
   try {
     var service = await getTrackerService();
 

@@ -167,6 +167,8 @@ class TrackerService {
     );
   }
 
+  /// Perform http/sqflite operation in loops for [durationMs]
+  /// default to 45s.
   Future<int> workOnce({String? tag, int? durationMs}) async {
     tag ??= '???';
     var future = _workOnce(tag: tag, durationMs: durationMs);
