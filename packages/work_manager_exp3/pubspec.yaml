@@ -64,6 +64,7 @@ dependencies:
     path: ../work_manager_exp_common
   path_provider:
   sqflite:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

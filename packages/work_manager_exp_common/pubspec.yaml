@@ -18,7 +18,7 @@ dependencies:
     version: '>=0.1.0'
   sqflite_common:
   cv:
-  flutter_local_notifications:
+  flutter_local_notifications: '>=9.2.0'
   tekartik_app_flutter_mutex:
     git:
       url: https://github.com/alextekartik/background_flutter_exp.dart
@@ -28,6 +28,7 @@ dependencies:
   rxdart:
   firebase_messaging:
   firebase_core:
+  path_provider: '>=2.0.8'
 dev_dependencies:
   sqflite_common_ffi:
   flutter_test:
