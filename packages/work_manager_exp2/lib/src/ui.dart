@@ -109,7 +109,9 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
       runOnceTaskName,
       initialDelay: Duration(seconds: seconds),
     );
-    snack(context, 'Triggered in $seconds seconds');
+    if (mounted) {
+      snack(context, 'Triggered in $seconds seconds');
+    }
   }
 
   final groupExpandedMap = <int, bool>{};

@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tekartik_app_flutter_mutex/mutex.dart';
+// ignore: depend_on_referenced_packages
 import 'package:tekartik_common_utils/common_utils_import.dart';
 
 Future<dynamic> _isolate1(dynamic _) async {
