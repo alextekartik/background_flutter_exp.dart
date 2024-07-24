@@ -39,18 +39,18 @@ void main() {
     test('one_mutex', () async {
       var mutex = Mutex('mutex');
       await mutex.setData('test', 1);
-      expect(await mutex.getData('test'), 1);
+      expect(await mutex.getData<int>('test'), 1);
       await mutex.setData('test', null);
-      expect(await mutex.getData('test'), isNull);
+      expect(await mutex.getData<int?>('test'), isNull);
     });
 
     test('two_mutex', () async {
       var mutex1 = Mutex('mutex');
       var mutex2 = Mutex('mutex');
       await mutex1.setData('test', 1);
-      expect(await mutex2.getData('test'), 1);
+      expect(await mutex2.getData<int>('test'), 1);
       await mutex2.setData('test', null);
-      expect(await mutex1.getData('test'), isNull);
+      expect(await mutex1.getData<int>('test'), isNull);
     });
 
     test('two_isolate', () async {

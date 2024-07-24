@@ -184,7 +184,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
               );
             }
             // devPrint('groups: ${groupList.length}');
-            var groupIds = Set.from(groupList.map((group) => group.groupId));
+            var groupIds =
+                Set<int>.from(groupList.map((group) => group.groupId));
             groupExpandedMap
                 .removeWhere((key, value) => !groupIds.contains(key));
             return SingleChildScrollView(

@@ -11,7 +11,7 @@ import 'package:workmanager/workmanager.dart';
 late TrackerService service;
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
 }
 
 class TrackItemListPage extends StatefulWidget {
-  const TrackItemListPage({Key? key}) : super(key: key);
+  const TrackItemListPage({super.key});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -109,7 +109,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
       runOnceTaskName,
       initialDelay: Duration(seconds: seconds),
     );
-    if (mounted) {
+    if (context.mounted) {
       snack(context, 'Triggered in $seconds seconds');
     }
   }
@@ -187,7 +187,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
               );
             }
             // devPrint('groups: ${groupList.length}');
-            var groupIds = Set.from(groupList.map((group) => group.groupId));
+            var groupIds =
+                Set<int>.from(groupList.map((group) => group.groupId));
             groupExpandedMap
                 .removeWhere((key, value) => !groupIds.contains(key));
             return SingleChildScrollView(

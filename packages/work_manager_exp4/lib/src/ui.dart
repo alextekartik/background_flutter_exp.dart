@@ -87,7 +87,7 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
         /// Mark as handled
         gHomeNotificationSubject.add(null);
         gAppNotificationSubject.add(null);
-        showDialog(
+        showDialog<void>(
             context: context,
             builder: (BuildContext context) {
               // return object of type Dialog
@@ -185,8 +185,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                   onTap: () async {
                     // devPrint('#1');
                     // Navigator.of(context).pop();
-                    await Future.delayed(Duration.zero);
-                    await Navigator.of(context).push(MaterialPageRoute(
+                    await Future<void>.delayed(Duration.zero);
+                    await Navigator.of(context).push(MaterialPageRoute<void>(
                         builder: (_) => const SettingsPage()));
                     // devPrint('#2');
                   }),
@@ -245,7 +245,8 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
               );
             }
             // devPrint('groups: ${groupList.length}');
-            var groupIds = Set.from(groupList.map((group) => group.groupId));
+            var groupIds =
+                Set<int>.from(groupList.map((group) => group.groupId));
             groupExpandedMap
                 .removeWhere((key, value) => !groupIds.contains(key));
             return SingleChildScrollView(

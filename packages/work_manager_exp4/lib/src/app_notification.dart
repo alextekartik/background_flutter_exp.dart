@@ -43,6 +43,6 @@ class _AppNotificationState extends State<AppNotification> {
 
 void popAllAndGoToHomeScreen(BuildContext context) {
   Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const TrackItemListPage()),
+      MaterialPageRoute<void>(builder: (_) => const TrackItemListPage()),
       (route) => false);
 }

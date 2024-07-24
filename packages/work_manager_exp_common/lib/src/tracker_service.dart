@@ -142,7 +142,7 @@ class TrackerService {
     // app_icon needs to be a added as a drawable
     // resource to the Android head project.
     var android = const AndroidInitializationSettings('ic_notification');
-    var iOS = const IOSInitializationSettings();
+    var iOS = const DarwinInitializationSettings();
 
     // initialise settings for both Android and iOS device.
     var settings = InitializationSettings(android: android, iOS: iOS);
@@ -151,7 +151,7 @@ class TrackerService {
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
         'test', 'test',
         importance: Importance.max, priority: Priority.high);
-    var iOSPlatformChannelSpecifics = const IOSNotificationDetails();
+    var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
 
     // initialise channel platform for both Android and iOS device.
     var platformChannelSpecifics = NotificationDetails(

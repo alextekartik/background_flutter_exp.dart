@@ -27,7 +27,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
     // Handle cancel when main request it
     () async {
       while (!done) {
-        if (await mutex.getData(mainRequestKeyName) == true) {
+        if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
           service.isKilled = true;
         }
       }

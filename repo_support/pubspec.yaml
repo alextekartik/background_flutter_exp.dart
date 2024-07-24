@@ -4,12 +4,12 @@ version: 0.2.0
 publish_to: none
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: ^3.4.0
 
 dev_dependencies:
   path:
   pub_semver:
-  dev_test:
+  dev_build:
   pedantic:
   tekartik_lints:
     git:

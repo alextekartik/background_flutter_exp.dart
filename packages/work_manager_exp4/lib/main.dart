@@ -58,7 +58,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
   // Handle cancel when main request it
   () async {
     while (!done) {
-      if (await mutex.getData(mainRequestKeyName) == true) {
+      if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
         service.isKilled = true;
       }
     }
@@ -159,7 +159,7 @@ Future<void> main() async {
   gPushMessagingService = PushMessagingService();
   const initializationSettingsAndroid =
       AndroidInitializationSettings('ic_notification');
-  const initializationSettingsIOS = IOSInitializationSettings();
+  const initializationSettingsIOS = DarwinInitializationSettings();
   const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
     iOS: initializationSettingsIOS,
@@ -168,12 +168,14 @@ Future<void> main() async {
       ? null
       : await gFlutterLocalNotificationsPlugin
           .getNotificationAppLaunchDetails();
-  var payload = notificationAppLaunchDetails?.payload;
+  var payload = notificationAppLaunchDetails?.notificationResponse?.payload;
   if (payload != null) {
     gSelectNotificationSubject.add(payload);
   }
   await gFlutterLocalNotificationsPlugin.initialize(initializationSettings,
-      onSelectNotification: (String? payload) async {
+      onDidReceiveBackgroundNotificationResponse:
+          (NotificationResponse? response) async {
+    var payload = response?.payload;
     if (payload != null) {
       gSelectNotificationSubject.add(payload);
     } else {
