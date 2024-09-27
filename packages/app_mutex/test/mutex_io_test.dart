@@ -1,5 +1,5 @@
 @TestOn('vm')
-library tekartik_app_flutter_mutex.mutex_io_test;
+library;
 
 import 'dart:io';
 import 'dart:math';

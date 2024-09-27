@@ -59,11 +59,11 @@ dependencies:
       ref: dart2_3
       path: app_http
     version: '>=0.1.0'
-  sqflite_common_ffi: 2.1.0
+  sqflite_common_ffi: '>=1.0.0'
   work_manager_exp_common:
     path: ../work_manager_exp_common
   path_provider:
-  sqflite:
+  sqflite: '>=2.3.3+1'
 
 dev_dependencies:
   flutter_test:
