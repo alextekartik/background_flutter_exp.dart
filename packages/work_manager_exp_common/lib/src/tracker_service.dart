@@ -241,7 +241,7 @@ class TrackerService {
       });
       groupId = newGroupId;
       lastId ??= 0;
-      if (lastId! > itemUpdated.value!) {
+      if (lastId! > itemUpdated.value) {
         itemUpdated.add(lastId!);
       }
       delayMs = (delayMs * 1.5).toInt();

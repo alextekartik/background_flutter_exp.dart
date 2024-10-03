@@ -30,6 +30,7 @@ dependencies:
   firebase_messaging:
   firebase_core:
   path_provider: '>=2.0.8'
+
 dev_dependencies:
   sqflite_common_ffi:
   flutter_test:

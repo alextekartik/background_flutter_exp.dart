@@ -65,6 +65,8 @@ dependencies:
   path_provider:
   sqflite: '>=2.3.3+1'
 
+  flutter_local_notifications: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +83,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
 
+  process_run: any
 dependency_overrides:
   tekartik_app_flutter_mutex:
   #  path: ../../../../github.com/tekartik/app_flutter_utils.dart/app_bg_isolate
