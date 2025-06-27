@@ -50,15 +50,18 @@ void main() {
 
     test('two_isolate', () async {
       expect(
-          await Future.wait([compute(_isolate, '1'), compute(_isolate, '2')]),
-          [true, true]);
+        await Future.wait([compute(_isolate, '1'), compute(_isolate, '2')]),
+        [true, true],
+      );
     });
     var count = 5;
     test('${count}_isolate', () async {
       expect(
-          await Future.wait(List.generate(
-              count, (index) => compute(_isolate, '${index + 1}'))),
-          List.filled(count, true));
+        await Future.wait(
+          List.generate(count, (index) => compute(_isolate, '${index + 1}')),
+        ),
+        List.filled(count, true),
+      );
     }, timeout: Timeout(Duration(seconds: count * 30)));
   });
 }

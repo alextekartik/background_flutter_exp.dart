@@ -4,7 +4,7 @@ import 'package:work_manager_exp4/src/client.dart';
 import 'package:workmanager/workmanager.dart';
 
 void main() {
-  mainMenu(() {
+  mainMenuFlutter(() {
     enter(() async {
       service = await getTrackerService();
     });
@@ -17,17 +17,15 @@ void main() {
       var items = (await service.getListItems()).items;
       for (var item in items) {
         write(
-            '${item.id.v} ${item.groupId.v} ${item.genId} ${item.timestamp.v}');
+          '${item.id.v} ${item.groupId.v} ${item.genId} ${item.timestamp.v}',
+        );
       }
     });
     item('initializeWorkmanager', () {
       initializeWorkmanager();
     });
     item('run now', () {
-      Workmanager().registerOneOffTask(
-        '2',
-        periodicTaskName,
-      );
+      Workmanager().registerOneOffTask('2', periodicTaskName);
     });
     item('run in 15 seconds', () {
       Workmanager().registerOneOffTask(

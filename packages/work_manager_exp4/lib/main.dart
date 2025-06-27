@@ -26,20 +26,14 @@ var flip = FlutterLocalNotificationsPlugin();
 void requestNotificationPermissions() {
   flip
       .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+        IOSFlutterLocalNotificationsPlugin
+      >()
+      ?.requestPermissions(alert: true, badge: true, sound: true);
   flip
       .resolvePlatformSpecificImplementation<
-          MacOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+        MacOSFlutterLocalNotificationsPlugin
+      >()
+      ?.requestPermissions(alert: true, badge: true, sound: true);
 }
 
 /// Main service entry.
@@ -62,8 +56,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
         service.isKilled = true;
       }
     }
-  }()
-      .unawait();
+  }().unawait();
 
   print('Workmanager starting serviceRun $tag');
   await service.workOnce(tag: tag);
@@ -105,10 +98,10 @@ void callbackDispatcher() {
 
 void initializeWorkmanager() {
   Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          false // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
+    callbackDispatcher, // The top level function, aka callbackDispatcher
+    isInDebugMode:
+        false, // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
 }
 
 const mutexName = 'appMutex';
@@ -133,10 +126,7 @@ Future<void> main() async {
   // Periodic task registration, android only
   if (Platform.isAndroid) {
     try {
-      await Workmanager().registerPeriodicTask(
-        '100',
-        periodicTaskName,
-      );
+      await Workmanager().registerPeriodicTask('100', periodicTaskName);
     } catch (e) {
       print('Error #e');
     }
@@ -153,12 +143,12 @@ Future<void> main() async {
 
       await sleep(10 * 60 * 1000);
     }
-  }()
-      .unawait();
+  }().unawait();
 
   gPushMessagingService = PushMessagingService();
-  const initializationSettingsAndroid =
-      AndroidInitializationSettings('ic_notification');
+  const initializationSettingsAndroid = AndroidInitializationSettings(
+    'ic_notification',
+  );
   const initializationSettingsIOS = DarwinInitializationSettings();
   const initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
@@ -167,36 +157,37 @@ Future<void> main() async {
   final notificationAppLaunchDetails = !kIsWeb && Platform.isLinux
       ? null
       : await gFlutterLocalNotificationsPlugin
-          .getNotificationAppLaunchDetails();
+            .getNotificationAppLaunchDetails();
   var payload = notificationAppLaunchDetails?.notificationResponse?.payload;
   if (payload != null) {
     gSelectNotificationSubject.add(payload);
   }
-  await gFlutterLocalNotificationsPlugin.initialize(initializationSettings,
-      onDidReceiveBackgroundNotificationResponse:
-          (NotificationResponse? response) async {
-    var payload = response?.payload;
-    if (payload != null) {
-      gSelectNotificationSubject.add(payload);
-    } else {
-      debugPrint('notification payload null');
-    }
-    debugPrint('notification payload: $payload');
-    Model data;
-    try {
-      data = asModel(jsonDecode(payload!) as Map);
-    } catch (_) {
-      data = newModel();
-    }
-    gAppNotificationSubject.add(data);
-  });
+  await gFlutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveBackgroundNotificationResponse:
+        (NotificationResponse? response) async {
+          var payload = response?.payload;
+          if (payload != null) {
+            gSelectNotificationSubject.add(payload);
+          } else {
+            debugPrint('notification payload null');
+          }
+          debugPrint('notification payload: $payload');
+          Model data;
+          try {
+            data = asModel(jsonDecode(payload!) as Map);
+          } catch (_) {
+            data = newModel();
+          }
+          gAppNotificationSubject.add(data);
+        },
+  );
   () async {
     try {
       await gPushMessagingService.init();
     } catch (e) {
       debugPrint('push amessaging init failed $e');
     }
-  }()
-      .unawait();
+  }().unawait();
   runApp(const MyApp());
 }

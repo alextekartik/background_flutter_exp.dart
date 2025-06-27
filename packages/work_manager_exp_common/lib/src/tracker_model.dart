@@ -21,16 +21,16 @@ class TrackItem extends CvModelBase {
   final error = CvField<String>('error');
   @override
   List<CvField> get fields => [
-        id,
-        groupId,
-        processId,
-        isolateName,
-        tag,
-        timestamp,
-        localTimestamp,
-        genId,
-        error
-      ];
+    id,
+    groupId,
+    processId,
+    isolateName,
+    tag,
+    timestamp,
+    localTimestamp,
+    genId,
+    error,
+  ];
 
   String get anyTimestamp =>
       timestamp.v ?? localTimestamp.v ?? DateTime.now().toIso8601String();
@@ -43,30 +43,30 @@ class ItemList {
   ItemList(this.items, this.lastChangeId);
 
   List<TrackGroup> get groups => () {
-        var list = <TrackGroup>[];
-        int? previousGroupId;
-        List<TrackItem>? previousItems;
-        var allItems = items;
-        // devPrint('items: ${allItems.length}');
-        try {
-          for (var item in allItems) {
-            var groupId = item.groupId.v!;
-            // devPrint('item $previousGroupId/$groupId');
-            if (previousGroupId != groupId) {
-              // devPrint('$previousGroupId/$groupId');
-              previousGroupId = groupId;
-              previousItems = <TrackItem>[];
-              list.add(TrackGroup(previousItems));
-            }
-
-            previousItems!.add(item);
-          }
-        } catch (e) {
-          // print('Error $e');
+    var list = <TrackGroup>[];
+    int? previousGroupId;
+    List<TrackItem>? previousItems;
+    var allItems = items;
+    // devPrint('items: ${allItems.length}');
+    try {
+      for (var item in allItems) {
+        var groupId = item.groupId.v!;
+        // devPrint('item $previousGroupId/$groupId');
+        if (previousGroupId != groupId) {
+          // devPrint('$previousGroupId/$groupId');
+          previousGroupId = groupId;
+          previousItems = <TrackItem>[];
+          list.add(TrackGroup(previousItems));
         }
-        // print('groups: ${list.length}');
-        return list;
-      }();
+
+        previousItems!.add(item);
+      }
+    } catch (e) {
+      // print('Error $e');
+    }
+    // print('groups: ${list.length}');
+    return list;
+  }();
 }
 
 class TrackGroup {

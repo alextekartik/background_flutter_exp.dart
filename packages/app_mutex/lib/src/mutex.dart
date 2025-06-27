@@ -46,8 +46,11 @@ abstract class Mutex {
   Future<void> release();
 
   /// Used as a lock.
-  Future<T> synchronized<T>(FutureOr<T> Function(Mutex mutex) action,
-      {bool Function()? cancel, Duration? timeout});
+  Future<T> synchronized<T>(
+    FutureOr<T> Function(Mutex mutex) action, {
+    bool Function()? cancel,
+    Duration? timeout,
+  });
 
   /// Set some shared data.
   Future<void> setData<T>(String key, T data);
@@ -191,7 +194,8 @@ class MutexImpl implements Mutex {
         } catch (e) {
           if (_log.on) {
             _log.warning(
-                '$e isolate unresponsive. Force terminate, unregister and respawn');
+              '$e isolate unresponsive. Force terminate, unregister and respawn',
+            );
           }
           try {
             lookup.send(killCommand);
@@ -202,8 +206,10 @@ class MutexImpl implements Mutex {
       final receivePort = ReceivePort();
       var sendPortFuture = receivePort.first;
 
-      await Isolate.spawn(_mutexIsolate, [receivePort.sendPort, name],
-          debugName: 'mutex_isolate_${Random().nextInt(10000000)}');
+      await Isolate.spawn(_mutexIsolate, [
+        receivePort.sendPort,
+        name,
+      ], debugName: 'mutex_isolate_${Random().nextInt(10000000)}');
       try {
         // 1 second timeout
         var sendPort = await sendPortFuture.timeout(_timeout) as SendPort?;
@@ -228,12 +234,17 @@ class MutexImpl implements Mutex {
         if (!result) {
           if (cancel != null && cancel()) {
             throw MutexException._(
-                cancelled: true, message: 'Acquired cancelled');
+              cancelled: true,
+              message: 'Acquired cancelled',
+            );
           }
           if (timeout != null) {
             if (sw.elapsed.inMilliseconds > timeout.inMilliseconds) {
               throw MutexException._(
-                  timeout: true, cancelled: true, message: 'Acquired timeout');
+                timeout: true,
+                cancelled: true,
+                message: 'Acquired timeout',
+              );
             }
           }
         }
@@ -248,8 +259,11 @@ class MutexImpl implements Mutex {
 
   /// Run in critical section
   @override
-  Future<T> synchronized<T>(FutureOr<T> Function(Mutex mutex) action,
-      {bool Function()? cancel, Duration? timeout}) async {
+  Future<T> synchronized<T>(
+    FutureOr<T> Function(Mutex mutex) action, {
+    bool Function()? cancel,
+    Duration? timeout,
+  }) async {
     try {
       await acquire(cancel: cancel);
       return await action(this);
@@ -265,7 +279,9 @@ class MutexImpl implements Mutex {
     var result = await _send<bool>([releaseCommand, clientId]);
     if (!result) {
       throw MutexException._(
-          notAcquired: true, message: 'Release not acquired');
+        notAcquired: true,
+        message: 'Release not acquired',
+      );
     }
   }
 
@@ -287,11 +303,12 @@ class MutexException implements Exception {
   final bool notAcquired;
   final String message;
 
-  MutexException._(
-      {this.cancelled = false,
-      this.timeout = false,
-      this.notAcquired = false,
-      required this.message});
+  MutexException._({
+    this.cancelled = false,
+    this.timeout = false,
+    this.notAcquired = false,
+    required this.message,
+  });
   @override
   String toString() => message;
 }

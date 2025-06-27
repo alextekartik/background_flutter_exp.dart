@@ -28,10 +28,12 @@ Future<dynamic> _isolate1Crash(dynamic _) async {
 Future<dynamic> _isolate2(dynamic _) async {
   await sleep(100);
   var mutex = Mutex('mutex');
-  await mutex.acquire(cancel: () {
-    print('waiting');
-    return false;
-  });
+  await mutex.acquire(
+    cancel: () {
+      print('waiting');
+      return false;
+    },
+  );
   await mutex.release();
 }
 
@@ -64,10 +66,12 @@ void main() {
         done = true;
       }).unawait();
       try {
-        await mutex2.acquire(cancel: () {
-          print('waiting');
-          return done;
-        });
+        await mutex2.acquire(
+          cancel: () {
+            print('waiting');
+            return done;
+          },
+        );
         fail('should fail');
       } on MutexException catch (e) {
         expect(e.cancelled, isTrue);
@@ -104,7 +108,7 @@ void main() {
             await compute(_isolate1Crash, '1');
           } catch (_) {}
         }(),
-        compute(_isolate2, '2')
+        compute(_isolate2, '2'),
       ]);
     });
   });

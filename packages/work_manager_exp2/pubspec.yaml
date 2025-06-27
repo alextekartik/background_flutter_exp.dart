@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.8.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -27,52 +27,52 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  cv:
+  cv: ">=1.1.0+4"
   rxdart:
   flutter:
     sdk: flutter
   tekartik_app_flutter_mutex:
     git:
-      url: https://github.com/tekartik/app_flutter_utils.dart
-      ref: dart2_3
-      path: app_mutex
+      url: https://github.com/alextekartik/background_flutter_exp.dart
+      ref: main
+      path: packages/app_mutex
     version: '>=0.2.2'
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ">=1.0.8"
   tekartik_test_menu_flutter:
     git:
       url: https://github.com/tekartik/test_menu_flutter
-      ref: dart2_3
+      ref: dart3a
       path: test_menu_flutter
     version: '>=0.2.5'
   workmanager:
   tekartik_android_utils:
     git:
       url: https://github.com/tekartik/android_utils.dart
-      ref: dart2_3
+      ref: dart3a
     version: '>=0.6.0+1'
   tekartik_app_http:
     git:
       url: https://github.com/tekartik/app_common_utils.dart
-      ref: dart2_3
+      ref: dart3a
       path: app_http
     version: '>=0.1.0'
-  sqflite_common_ffi: 2.1.0
+  sqflite_common_ffi: ">=2.3.4"
   sqlite3_flutter_libs:
   work_manager_exp_common:
     path: ../work_manager_exp_common
   path_provider: '>=2.0.8'
 dev_dependencies:
-  process_run:
+  process_run: ">=1.2.1+1"
   flutter_test:
     sdk: flutter
   tekartik_lints_flutter:
     git:
       url: https://github.com/tekartik/common_flutter.dart
-      ref: dart2_3
+      ref: dart3a
       path: packages/lints_flutter
     version: '>=0.1.0'
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -80,12 +80,8 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: '>=1.0.0'
+  flutter_lints: ">=5.0.0"
 
-dependency_overrides:
-  tekartik_app_flutter_mutex:
-  #  path: ../../../../github.com/tekartik/app_flutter_utils.dart/app_bg_isolate
-    path: ../app_mutex
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -96,6 +92,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+resolution: workspace
 
   # To add assets to your application, add an assets section, like this:
   # assets:

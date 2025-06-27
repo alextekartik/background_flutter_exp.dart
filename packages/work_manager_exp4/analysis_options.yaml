@@ -1,4 +1,7 @@
 # tekartik flutter recommended lints (extension over google lints and pedantic)
+analyzer:
+  errors:
+    depend_on_referenced_packages: ignore
 include: package:tekartik_lints_flutter/strict.yaml
 
 linter:

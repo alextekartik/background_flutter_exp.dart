@@ -23,25 +23,28 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
   //var client = TrackerServiceClient();
   var mutex = Mutex(mutexName);
   var done = false;
-  await mutex.synchronized((mutex) async {
-    // Handle cancel when main request it
-    () async {
-      while (!done) {
-        if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
-          service.isKilled = true;
+  await mutex.synchronized(
+    (mutex) async {
+      // Handle cancel when main request it
+      () async {
+        while (!done) {
+          if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
+            service.isKilled = true;
+          }
         }
-      }
-    }()
-        .unawait();
+      }().unawait();
 
-    print('Workmanager starting serviceRun $tag');
-    await service.workOnce(tag: tagBackground);
+      print('Workmanager starting serviceRun $tag');
+      await service.workOnce(tag: tagBackground);
 
-    print('Workmanager ending serviceRun $tag');
-  }, cancel: () {
-    stdout.writeln('Bg waiting...');
-    return false;
-  }, timeout: const Duration(milliseconds: 10000));
+      print('Workmanager ending serviceRun $tag');
+    },
+    cancel: () {
+      stdout.writeln('Bg waiting...');
+      return false;
+    },
+    timeout: const Duration(milliseconds: 10000),
+  );
 }
 
 void callbackDispatcher() {
@@ -78,10 +81,10 @@ void callbackDispatcher() {
 
 void initializeWorkmanager() {
   Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          false // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
+    callbackDispatcher, // The top level function, aka callbackDispatcher
+    isInDebugMode:
+        false, // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
 }
 
 const mutexName = 'appMutex';
@@ -91,11 +94,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _id++;
   var mutex = Mutex(mutexName);
-  await mutex.acquire(cancel: () {
-    stdout.writeln('Main waiting...');
-    mutex.setData(mainRequestKeyName, true);
-    return false;
-  });
+  await mutex.acquire(
+    cancel: () {
+      stdout.writeln('Main waiting...');
+      mutex.setData(mainRequestKeyName, true);
+      return false;
+    },
+  );
   await mutex.setData(mainRequestKeyName, false);
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
@@ -107,10 +112,7 @@ Future<void> main() async {
   // Periodic task registration, android only
   if (Platform.isAndroid) {
     try {
-      await Workmanager().registerPeriodicTask(
-        '100',
-        periodicTaskName,
-      );
+      await Workmanager().registerPeriodicTask('100', periodicTaskName);
     } catch (e) {
       print('Error #e');
     }
@@ -127,8 +129,7 @@ Future<void> main() async {
 
       await sleep(10 * 60 * 1000);
     }
-  }()
-      .unawait();
+  }().unawait();
 
   runApp(const MyApp());
 }

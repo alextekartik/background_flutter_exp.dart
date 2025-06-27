@@ -22,13 +22,15 @@ Future<dynamic> _isolate2(dynamic _) async {
   await sleep(100);
   var mutex = Mutex('mutex');
   var i = 0;
-  await mutex.acquire(cancel: () {
-    print('waiting');
-    if (++i > 5) {
-      mutex.setData('test', true);
-    }
-    return false;
-  });
+  await mutex.acquire(
+    cancel: () {
+      print('waiting');
+      if (++i > 5) {
+        mutex.setData('test', true);
+      }
+      return false;
+    },
+  );
 
   await mutex.release();
   await mutex.setData('test', false);

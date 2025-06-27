@@ -31,11 +31,7 @@ class PushNotificationInfo extends CvModelBase {
 /// We receive it too late on start
 PushNotificationInfo? launchPushNotification;
 
-enum PushMessagingEventType {
-  onMessage,
-  onLaunch,
-  onResume,
-}
+enum PushMessagingEventType { onMessage, onLaunch, onResume }
 
 class PushMessagingEvent {
   final PushMessagingEventType type;
@@ -92,20 +88,22 @@ class PushMessagingService {
       _tokenSubject.add(token);
     });
 
-    void _addMessage(
-        Map<String, dynamic> message, PushMessagingEventType type) {
+    void addMessage(Map<String, dynamic> message, PushMessagingEventType type) {
       if (isDebug) {
         log(_tag, '$type message ${json.encode(message)}');
       }
       // We don't know the context yet
-      _pushMessagingEventSubject.add(PushMessagingEvent(
-          type: type, info: PushNotificationInfo(/*message*/)));
+      _pushMessagingEventSubject.add(
+        PushMessagingEvent(type: type, info: PushNotificationInfo(/*message*/)),
+      );
     }
 
     // If set for testing, push it
     if (launchPushNotification != null) {
-      _addMessage(
-          launchPushNotification!.toMap(), PushMessagingEventType.onLaunch);
+      addMessage(
+        launchPushNotification!.toMap(),
+        PushMessagingEventType.onLaunch,
+      );
     }
 
     /*
@@ -116,7 +114,7 @@ class PushMessagingService {
       await _firebaseMessaging!.subscribeToTopic(fcmTestTopicDev);
     }*/
 
-    void _handleMessage(RemoteMessage message) {
+    void handleMessage(RemoteMessage message) {
       if (isDebug) {
         log(_tag, '_handleMessage:$message');
         log(_tag, message.data);
@@ -133,12 +131,12 @@ class PushMessagingService {
       // If the message also contains a data property with a "type" of "chat",
       // navigate to a chat screen
       if (initialMessage != null) {
-        _handleMessage(initialMessage);
+        handleMessage(initialMessage);
       }
 
       // Also handle any interaction when the app is in the background via a
       // Stream listener
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+      FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
       //final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (isDebug) {
@@ -152,19 +150,20 @@ class PushMessagingService {
         // local notification to show to users using the created channel.
         if (notification != null && android != null) {
           gFlutterLocalNotificationsPlugin.show(
-              notification.hashCode,
-              notification.title,
-              notification.body,
-              NotificationDetails(
-                android: AndroidNotificationDetails(
-                  channel.id,
-                  channel.name,
-                  //channel.description,
-                  icon: android.smallIcon,
-                  // other properties...
-                ),
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                //channel.description,
+                icon: android.smallIcon,
+                // other properties...
               ),
-              payload: jsonEncode(message.data));
+            ),
+            payload: jsonEncode(message.data),
+          );
         }
         serviceBgRun(service, 'fg_push');
       });
@@ -173,10 +172,10 @@ class PushMessagingService {
     await setupInteractedMessage();
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: true, // Required to display a heads up notification
-      badge: true,
-      sound: true,
-    );
+          alert: true, // Required to display a heads up notification
+          badge: true,
+          sound: true,
+        );
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
