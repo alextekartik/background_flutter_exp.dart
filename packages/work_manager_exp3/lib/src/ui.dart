@@ -8,7 +8,7 @@ import 'package:work_manager_exp_common/tracker_db.dart';
 import 'package:workmanager/workmanager.dart';
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   // This widget is the root of your application.
   @override
@@ -16,24 +16,24 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          //prim: Colors.blue,
-          ),
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // Notice that the counter didn't reset back to zero; the application
+        // is not restarted.
+        //prim: Colors.blue,
+      ),
       home: const TrackItemListPage(),
     );
   }
 }
 
 class TrackItemListPage extends StatefulWidget {
-  const TrackItemListPage({Key? key}) : super(key: key);
+  const TrackItemListPage({super.key});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -47,13 +47,7 @@ class TrackItemListPage extends StatefulWidget {
   State<TrackItemListPage> createState() => _TrackItemListPageState();
 }
 
-enum MenuAction {
-  clear,
-  runNow,
-  runIn15s,
-  runIn30s,
-  exit,
-}
+enum MenuAction { clear, runNow, runIn15s, runIn30s, exit }
 
 class _TrackItemListPageState extends State<TrackItemListPage> {
   final _itemList = BehaviorSubject<ItemList>();
@@ -76,8 +70,9 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
           }
           _itemList.add(items);
           // Wait for modification
-          await service.onItemsUpdated
-              .firstWhere((element) => element != items.lastChangeId);
+          await service.onItemsUpdated.firstWhere(
+            (element) => element != items.lastChangeId,
+          );
         } catch (e) {
           print(e);
         }
@@ -107,7 +102,9 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
       runOnceTaskName,
       initialDelay: Duration(seconds: seconds),
     );
-    snack(context, 'Triggered in $seconds seconds');
+    if (context.mounted) {
+      snack(context, 'Triggered in $seconds seconds');
+    }
   }
 
   final groupExpandedMap = <int, bool>{};
@@ -129,11 +126,12 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
           PopupMenuButton<MenuAction>(
             itemBuilder: (context) => [
               PopupMenuItem<MenuAction>(
-                  value: MenuAction.clear,
-                  child: const Text('Clear'),
-                  onTap: () {
-                    service.clearItems();
-                  }),
+                value: MenuAction.clear,
+                child: const Text('Clear'),
+                onTap: () {
+                  service.clearItems();
+                },
+              ),
               if (true) ...[
                 //]Platform.isAndroid) ...[
                 PopupMenuItem<MenuAction>(
@@ -151,144 +149,139 @@ class _TrackItemListPageState extends State<TrackItemListPage> {
                   },
                 ),
                 PopupMenuItem<MenuAction>(
-                    value: MenuAction.runIn30s,
-                    onTap: () {
-                      _triggerIn(context, 30);
-                    },
-                    child: const Text('Trigger in 30s')),
+                  value: MenuAction.runIn30s,
+                  onTap: () {
+                    _triggerIn(context, 30);
+                  },
+                  child: const Text('Trigger in 30s'),
+                ),
               ],
               PopupMenuItem<MenuAction>(
-                  value: MenuAction.exit,
-                  onTap: () {
-                    exit(0);
-                  },
-                  child: const Text('Exit')),
+                value: MenuAction.exit,
+                onTap: () {
+                  exit(0);
+                },
+                child: const Text('Exit'),
+              ),
             ],
           ),
         ],
       ),
       body: StreamBuilder<ItemList>(
-          stream: _itemList,
-          // Center is a layout widget. It takes a single child and positions it
-          // in the middle of the parent.
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            var groupList = snapshot.data!.groups.reversed.toList();
-            if (groupList.isEmpty) {
-              return const ListTile(
-                title: Center(child: Text('no data yet')),
-              );
-            }
-            // devPrint('groups: ${groupList.length}');
-            var groupIds =
-                Set<int>.from(groupList.map((group) => group.groupId));
-            groupExpandedMap
-                .removeWhere((key, value) => !groupIds.contains(key));
-            return SingleChildScrollView(
-              child: ExpansionPanelList(
-                expansionCallback: (int index, bool isExpanded) {
-                  setState(() {
-                    groupExpandedMap[groupList[index].groupId] = !isExpanded;
-                  });
-                },
-                children: groupList
-                    .map((group) => ExpansionPanel(
-                          headerBuilder: (context, isExpanded) {
-                            var timestamp = group.items.first.anyTimestamp;
-                            var startTimestamp = DateTime.tryParse(timestamp)!;
-                            var lastTimestamp = DateTime.tryParse(
-                                group.items.last.anyTimestamp)!;
-                            var durationText = lastTimestamp
-                                .difference(startTimestamp)
-                                .toString();
-                            var dotIndex = durationText.lastIndexOf('.');
-                            if (dotIndex != -1) {
-                              durationText =
-                                  durationText.substring(0, dotIndex);
-                            }
+        stream: _itemList,
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          var groupList = snapshot.data!.groups.reversed.toList();
+          if (groupList.isEmpty) {
+            return const ListTile(title: Center(child: Text('no data yet')));
+          }
+          // devPrint('groups: ${groupList.length}');
+          var groupIds = Set<int>.from(groupList.map((group) => group.groupId));
+          groupExpandedMap.removeWhere((key, value) => !groupIds.contains(key));
+          return SingleChildScrollView(
+            child: ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  groupExpandedMap[groupList[index].groupId] = !isExpanded;
+                });
+              },
+              children: groupList
+                  .map(
+                    (group) => ExpansionPanel(
+                      headerBuilder: (context, isExpanded) {
+                        var timestamp = group.items.first.anyTimestamp;
+                        var startTimestamp = DateTime.tryParse(timestamp)!;
+                        var lastTimestamp = DateTime.tryParse(
+                          group.items.last.anyTimestamp,
+                        )!;
+                        var durationText = lastTimestamp
+                            .difference(startTimestamp)
+                            .toString();
+                        var dotIndex = durationText.lastIndexOf('.');
+                        if (dotIndex != -1) {
+                          durationText = durationText.substring(0, dotIndex);
+                        }
 
-                            var localDateTime =
-                                startTimestamp.toLocal().toIso8601String();
-                            var dateTimeText = localDateTime
-                                .substring(0, 19)
-                                .replaceAll('T', ' ');
+                        var localDateTime = startTimestamp
+                            .toLocal()
+                            .toIso8601String();
+                        var dateTimeText = localDateTime
+                            .substring(0, 19)
+                            .replaceAll('T', ' ');
 
-                            var errorCount = 0;
-                            for (var item in group.items) {
-                              if (item.error.v != null) {
-                                errorCount++;
-                              }
-                            }
-                            var subtitle = (errorCount > 0
-                                    ? '$errorCount errors\n'
-                                    : '') +
-                                'Duration $durationText (${group.items.length} actions)';
-                            return ListTile(
-                              leading: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    group.items.first.tag.v ?? 'back',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  // Text(item.first.groupId.v?.toString() ?? ''),
-                                ],
-                              ),
-                              title: Text(dateTimeText),
-                              subtitle: Text(subtitle),
-                            );
-                          },
-                          body: Column(
-                              children: group.items.map(
-                            (item) {
-                              String dateTimeText;
-                              try {
-                                dateTimeText = DateTime.parse(item.anyTimestamp)
-                                    .toLocal()
-                                    .toIso8601String()
-                                    .substring(11, 19);
-                              } catch (_) {
-                                dateTimeText = '<none>';
-                              }
-                              var sb = StringBuffer();
-                              sb.add(dateTimeText);
-
-                              var title = sb.toString();
-                              sb = StringBuffer();
-                              if (item.error.v != null) {
-                                sb.add('Error: ${item.error.v}\n');
-                              }
-                              sb
-                                ..add('pid: ${item.processId.v}')
-                                ..add('isolate: ${item.isolateName.v}');
-                              if (item.error.v == null) {
-                                sb.add('${item.genId.v}');
-                              }
-
-                              var subtitle = sb.toString();
-                              return ListTile(
-                                dense: true,
-                                leading: const SizedBox(
-                                  width: 32,
+                        var errorCount = 0;
+                        for (var item in group.items) {
+                          if (item.error.v != null) {
+                            errorCount++;
+                          }
+                        }
+                        var subtitle =
+                            '${errorCount > 0 ? '$errorCount errors\n' : ''}Duration $durationText (${group.items.length} actions)';
+                        return ListTile(
+                          leading: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                group.items.first.tag.v ?? 'back',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                title: Text(title),
-                                subtitle: Text(subtitle),
-                              );
-                            },
-                          ).toList()),
-                          isExpanded: groupExpandedMap[group.groupId] ??= false,
-                        ))
-                    .toList(),
-              ),
-            );
-          }),
+                              ),
+                              // Text(item.first.groupId.v?.toString() ?? ''),
+                            ],
+                          ),
+                          title: Text(dateTimeText),
+                          subtitle: Text(subtitle),
+                        );
+                      },
+                      body: Column(
+                        children: group.items.map((item) {
+                          String dateTimeText;
+                          try {
+                            dateTimeText = DateTime.parse(
+                              item.anyTimestamp,
+                            ).toLocal().toIso8601String().substring(11, 19);
+                          } catch (_) {
+                            dateTimeText = '<none>';
+                          }
+                          var sb = StringBuffer();
+                          sb.add(dateTimeText);
+
+                          var title = sb.toString();
+                          sb = StringBuffer();
+                          if (item.error.v != null) {
+                            sb.add('Error: ${item.error.v}\n');
+                          }
+                          sb
+                            ..add('pid: ${item.processId.v}')
+                            ..add('isolate: ${item.isolateName.v}');
+                          if (item.error.v == null) {
+                            sb.add('${item.genId.v}');
+                          }
+
+                          var subtitle = sb.toString();
+                          return ListTile(
+                            dense: true,
+                            leading: const SizedBox(width: 32),
+                            title: Text(title),
+                            subtitle: Text(subtitle),
+                          );
+                        }).toList(),
+                      ),
+                      isExpanded: groupExpandedMap[group.groupId] ??= false,
+                    ),
+                  )
+                  .toList(),
+            ),
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _workOnce,
         tooltip: 'Worn once',

@@ -1,33 +1,33 @@
 name: tekartik_app_flutter_mutex
 description: Simple cross isolate mutex
-version: 0.0.1
+version: 0.2.3
 homepage:
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.8.0
   flutter: ">=1.17.0"
 
 dependencies:
   nanoid:
   flutter:
     sdk: flutter
-  cv:
-  path:
+  cv: ">=1.1.0+4"
+  path: ">=1.9.0"
   tekartik_app_common_utils:
     git:
       url: https://github.com/tekartik/app_common_utils.dart
-      ref: dart2_3
+      ref: dart3a
       path: app
     version: '>=0.1.4'
 dev_dependencies:
-  flutter_lints: '>=2.0.0'
+  flutter_lints: ">=5.0.0"
   flutter_test:
     sdk: flutter
   tekartik_lints_flutter:
     git:
       url: https://github.com/tekartik/common_flutter.dart
-      ref: dart2_3
+      ref: dart3a
       path: packages/lints_flutter
     version: '>=0.1.0'
 # For information on the generic Dart part of this file, see the
@@ -35,6 +35,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+resolution: workspace
 
   # To add assets to your package, add an assets section, like this:
   # assets:

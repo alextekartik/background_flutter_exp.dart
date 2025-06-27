@@ -18,7 +18,8 @@ class GenerateIdResult extends CvModelBase {
 /// Optional delay to let the server wait so simulate a long call.
 Future<GenerateIdResult> callRestGenerateId({int? delayMs}) async {
   var uri = Uri.parse(
-      'https://europe-west3-$projectId.cloudfunctions.net/$generateIdFnName');
+    'https://europe-west3-$projectId.cloudfunctions.net/$generateIdFnName',
+  );
   if (delayMs != null) {
     uri = uri.replace(queryParameters: {'delay': delayMs.toString()});
   }

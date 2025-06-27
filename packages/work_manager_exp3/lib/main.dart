@@ -24,20 +24,14 @@ var flip = FlutterLocalNotificationsPlugin();
 void requestNotificationPermissions() {
   flip
       .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+        IOSFlutterLocalNotificationsPlugin
+      >()
+      ?.requestPermissions(alert: true, badge: true, sound: true);
   flip
       .resolvePlatformSpecificImplementation<
-          MacOSFlutterLocalNotificationsPlugin>()
-      ?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+        MacOSFlutterLocalNotificationsPlugin
+      >()
+      ?.requestPermissions(alert: true, badge: true, sound: true);
 }
 
 Future<void> serviceBgRun(TrackerService service, String tag) async {
@@ -52,8 +46,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
         service.isKilled = true;
       }
     }
-  }()
-      .unawait();
+  }().unawait();
 
   print('Workmanager starting serviceRun');
   await service.workOnce(tag: tag);
@@ -102,10 +95,10 @@ void callbackDispatcher() {
 
 void initializeWorkmanager() {
   Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode:
-          false // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-      );
+    callbackDispatcher, // The top level function, aka callbackDispatcher
+    isInDebugMode:
+        false, // isDebug // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
 }
 
 const mutexName = 'appMutex';
@@ -126,10 +119,7 @@ Future<void> main() async {
   // Periodic task registration, android only
   if (Platform.isAndroid) {
     try {
-      await Workmanager().registerPeriodicTask(
-        '100',
-        periodicTaskName,
-      );
+      await Workmanager().registerPeriodicTask('100', periodicTaskName);
     } catch (e) {
       print('Error #e');
     }
@@ -146,8 +136,7 @@ Future<void> main() async {
 
       await sleep(10 * 60 * 1000);
     }
-  }()
-      .unawait();
+  }().unawait();
 
   runApp(const MyApp());
 }

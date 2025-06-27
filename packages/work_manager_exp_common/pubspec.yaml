@@ -3,22 +3,22 @@ description: Work manager experimentations common code
 version: 0.0.1
 publish_to: none
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.8.0
   flutter: ">=1.17.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  path:
+  path: ">=1.9.0"
   tekartik_app_http:
     git:
       url: https://github.com/tekartik/app_common_utils.dart
-      ref: dart2_3
+      ref: dart3a
       path: app_http
     version: '>=0.1.0'
   sqflite_common:
-  sqflite: '>=2.3.3+1'
-  cv: '>=1.0.0'
+  sqflite: ">=2.4.0"
+  cv: ">=1.1.0+4"
   flutter_local_notifications: '>=17.2.3'
   tekartik_app_flutter_mutex:
     git:
@@ -30,21 +30,23 @@ dependencies:
   firebase_messaging:
   firebase_core:
   path_provider: '>=2.0.8'
+  tekartik_common_utils:
+    git:
+      url: https://github.com/tekartik/common_utils.dart
+      ref: dart3a
 
 dev_dependencies:
-  sqflite_common_ffi:
+  sqflite_common_ffi: ">=2.3.4"
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
+  flutter_lints: ">=5.0.0"
 
-dependency_overrides:
-  tekartik_app_flutter_mutex:
-    path: ../app_mutex
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
 flutter:
+resolution: workspace
 
   # To add assets to your package, add an assets section, like this:
   # assets:

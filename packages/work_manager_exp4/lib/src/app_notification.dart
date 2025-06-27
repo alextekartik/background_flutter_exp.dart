@@ -6,10 +6,10 @@ import 'globals.dart';
 
 class AppNotification extends StatefulWidget {
   final Widget child;
-  const AppNotification({Key? key, required this.child}) : super(key: key);
+  const AppNotification({super.key, required this.child});
 
   @override
-  _AppNotificationState createState() => _AppNotificationState();
+  State<AppNotification> createState() => _AppNotificationState();
 }
 
 class _AppNotificationState extends State<AppNotification> {
@@ -43,6 +43,7 @@ class _AppNotificationState extends State<AppNotification> {
 
 void popAllAndGoToHomeScreen(BuildContext context) {
   Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const TrackItemListPage()),
-      (route) => false);
+    MaterialPageRoute<void>(builder: (_) => const TrackItemListPage()),
+    (route) => false,
+  );
 }

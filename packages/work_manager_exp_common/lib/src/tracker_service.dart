@@ -64,32 +64,36 @@ class TrackerService {
   late final Future<Database> _database = () async {
     // ignore: deprecated_member_use
     // await databaseFactory.setLogLevel(sqfliteLogLevelSql);
-    Future<void> _onCreate(Database db) async {
+    Future<void> onCreate(Database db) async {
       var batch = db.batch();
       batch.execute('DROP TABLE IF EXISTS $itemTable');
-      batch.execute('CREATE TABLE $itemTable ('
-          '${trackItemModel.id.k} INTEGER PRIMARY KEY AUTOINCREMENT'
-          ', ${trackItemModel.groupId.k} INTEGER, ${escapeName(trackItemModel.timestamp.k)} TEXT'
-          ', ${escapeName(trackItemModel.tag.k)} TEXT'
-          ', ${escapeName(trackItemModel.genId.k)} TEXT'
-          ', ${trackItemModel.localTimestamp.k} TEXT'
-          ', ${trackItemModel.processId.k} INTEGER'
-          ', ${trackItemModel.isolateName.k} TEXT'
-          ', ${trackItemModel.error.k} TEXT'
-          ')');
+      batch.execute(
+        'CREATE TABLE $itemTable ('
+        '${trackItemModel.id.k} INTEGER PRIMARY KEY AUTOINCREMENT'
+        ', ${trackItemModel.groupId.k} INTEGER, ${escapeName(trackItemModel.timestamp.k)} TEXT'
+        ', ${escapeName(trackItemModel.tag.k)} TEXT'
+        ', ${escapeName(trackItemModel.genId.k)} TEXT'
+        ', ${trackItemModel.localTimestamp.k} TEXT'
+        ', ${trackItemModel.processId.k} INTEGER'
+        ', ${trackItemModel.isolateName.k} TEXT'
+        ', ${trackItemModel.error.k} TEXT'
+        ')',
+      );
       await batch.commit();
     }
 
     var db = await databaseFactory.openDatabase(
-        dbDir != null ? join(dbDir!, 'tracker.db') : 'tracker.db',
-        options: OpenDatabaseOptions(
-            version: 6,
-            onCreate: (db, version) async {
-              await _onCreate(db);
-            },
-            onUpgrade: (db, oldVersion, version) async {
-              await _onCreate(db);
-            }));
+      dbDir != null ? join(dbDir!, 'tracker.db') : 'tracker.db',
+      options: OpenDatabaseOptions(
+        version: 6,
+        onCreate: (db, version) async {
+          await onCreate(db);
+        },
+        onUpgrade: (db, oldVersion, version) async {
+          await onCreate(db);
+        },
+      ),
+    );
     itemUpdated.add(await _getLastId(db));
     return db;
   }();
@@ -101,10 +105,14 @@ class TrackerService {
   }
 
   Future<int> _getLastId(DatabaseExecutor executor) async {
-    return (firstIntValue(await executor.query(itemTable,
+    return (firstIntValue(
+          await executor.query(
+            itemTable,
             orderBy: '${trackItemModel.id.k} DESC',
             columns: [trackItemModel.id.k],
-            limit: 1)) ??
+            limit: 1,
+          ),
+        ) ??
         0);
   }
 
@@ -113,12 +121,16 @@ class TrackerService {
       var db = await _database;
       return await db.transaction((txn) async {
         var lastId = await _getLastId(txn);
-        var result = await txn.query(itemTable,
-            orderBy:
-                '${trackItemModel.groupId.k} DESC, ${trackItemModel.id.k} DESC',
-            limit: 250);
-        var modelList =
-            result.cv<TrackItem>(builder: (_) => TrackItem()).reversed.toList();
+        var result = await txn.query(
+          itemTable,
+          orderBy:
+              '${trackItemModel.groupId.k} DESC, ${trackItemModel.id.k} DESC',
+          limit: 250,
+        );
+        var modelList = result
+            .cv<TrackItem>(builder: (_) => TrackItem())
+            .reversed
+            .toList();
         var list = ItemList(modelList, lastId);
         return list;
       });
@@ -149,14 +161,18 @@ class TrackerService {
     flip.initialize(settings);
 
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-        'test', 'test',
-        importance: Importance.max, priority: Priority.high);
+      'test',
+      'test',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
 
     // initialise channel platform for both Android and iOS device.
     var platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics);
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
     await flip.show(
       0,
       'Notification $tag',
@@ -215,28 +231,36 @@ class TrackerService {
         await db.transaction((txn) async {
           newGroupId = groupId;
 
-          newGroupId ??= (firstIntValue(await txn.query(itemTable,
+          newGroupId ??=
+              (firstIntValue(
+                    await txn.query(
+                      itemTable,
                       orderBy: '${trackItemModel.id.k} DESC',
                       columns: [trackItemModel.id.k],
-                      limit: 1)) ??
+                      limit: 1,
+                    ),
+                  ) ??
                   0) +
               1;
           lastId = await txn.insert(
-              itemTable,
-              (TrackItem()
-                    ..genId.setValue(result?.id.v)
-                    ..groupId.setValue(newGroupId)
-                    ..processId.setValue(pid)
-                    ..isolateName.setValue(Isolate.current.debugName)
-                    ..error.setValue(error)
-                    ..tag.setValue(tag)
-                    ..localTimestamp.v = localTimestamp
-                    ..timestamp.setValue(result?.timestamp.v))
-                  .toMap());
+            itemTable,
+            (TrackItem()
+                  ..genId.setValue(result?.id.v)
+                  ..groupId.setValue(newGroupId)
+                  ..processId.setValue(pid)
+                  ..isolateName.setValue(Isolate.current.debugName)
+                  ..error.setValue(error)
+                  ..tag.setValue(tag)
+                  ..localTimestamp.v = localTimestamp
+                  ..timestamp.setValue(result?.timestamp.v))
+                .toMap(),
+          );
           await sleep(max(500, min(delayMs ~/ 4, 3000)));
-          await txn.delete(itemTable,
-              where:
-                  '$idKey IN (SELECT $idKey FROM $itemTable ORDER BY $idKey DESC LIMIT 500 OFFSET 500)');
+          await txn.delete(
+            itemTable,
+            where:
+                '$idKey IN (SELECT $idKey FROM $itemTable ORDER BY $idKey DESC LIMIT 500 OFFSET 500)',
+          );
         });
       });
       groupId = newGroupId;

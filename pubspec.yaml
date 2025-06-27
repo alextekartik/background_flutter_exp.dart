@@ -1,0 +1,11 @@
+name: _
+publish_to: none
+environment:
+  sdk: ^3.8.0
+workspace:
+  - packages/app_mutex
+  - packages/work_manager_exp2
+  - packages/work_manager_exp3
+  - packages/work_manager_exp4
+  - packages/work_manager_exp_common
+  - repo_support
