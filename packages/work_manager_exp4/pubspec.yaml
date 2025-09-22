@@ -39,19 +39,16 @@ dependencies:
   tekartik_test_menu_flutter:
     git:
       url: https://github.com/tekartik/test_menu_flutter
-      ref: dart3a
       path: test_menu_flutter
     version: '>=0.2.5'
   workmanager:
   tekartik_android_utils:
     git:
       url: https://github.com/tekartik/android_utils.dart
-      ref: dart3a
     version: '>=0.6.0+1'
   tekartik_app_http:
     git:
       url: https://github.com/tekartik/app_common_utils.dart
-      ref: dart3a
       path: app_http
     version: '>=0.1.0'
   sqflite_common_ffi: ">=2.3.4"
@@ -65,7 +62,6 @@ dev_dependencies:
   tekartik_lints_flutter:
     git:
       url: https://github.com/tekartik/common_flutter.dart
-      ref: dart3a
       path: packages/lints_flutter
     version: '>=0.1.0'
   # The "flutter_lints" package below contains a set of recommended lints to
