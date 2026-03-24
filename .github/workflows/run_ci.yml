@@ -20,8 +20,6 @@ jobs:
             flutter: stable
           - os: ubuntu-latest
             flutter: beta
-          - os: ubuntu-latest
-            flutter: dev
           - os: windows-latest
             flutter: stable
           - os: macos-latest
