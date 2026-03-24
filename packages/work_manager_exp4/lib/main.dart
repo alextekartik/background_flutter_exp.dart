@@ -161,7 +161,7 @@ Future<void> main() async {
     gSelectNotificationSubject.add(payload);
   }
   await gFlutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
+    settings: initializationSettings,
     onDidReceiveBackgroundNotificationResponse:
         (NotificationResponse? response) async {
           var payload = response?.payload;

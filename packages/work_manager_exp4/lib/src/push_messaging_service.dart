@@ -150,10 +150,10 @@ class PushMessagingService {
         // local notification to show to users using the created channel.
         if (notification != null && android != null) {
           gFlutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
+            id: 1, // ??
+            title: notification.title,
+            body: notification.body,
+            notificationDetails: NotificationDetails(
               android: AndroidNotificationDetails(
                 channel.id,
                 channel.name,

@@ -43,6 +43,7 @@ Future<bool> _isolate(String content) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('mutex', () {
     test('two_mutex', () async {
       expect(await Future.wait([_isolate('1'), _isolate('2')]), [true, true]);

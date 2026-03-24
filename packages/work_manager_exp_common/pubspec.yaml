@@ -3,7 +3,7 @@ description: Work manager experimentations common code
 version: 0.0.1
 publish_to: none
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.11.0
   flutter: ">=1.17.0"
 
 dependencies:
@@ -18,22 +18,23 @@ dependencies:
   sqflite_common:
   sqflite: ">=2.4.0"
   cv: ">=1.1.0+4"
-  flutter_local_notifications: '>=17.2.3'
+  flutter_local_notifications: '>=21.0.0'
   tekartik_app_flutter_mutex:
     git:
       url: https://github.com/alextekartik/background_flutter_exp.dart
       ref: main
       path: packages/app_mutex
     version: '>=0.2.2'
-  rxdart:
+  rxdart: ">=0.28.0"
   firebase_messaging:
-  firebase_core:
+  firebase_core: ">=4.2.0"
   path_provider: '>=2.0.8'
   tekartik_common_utils:
     git:
       url: https://github.com/tekartik/common_utils.dart
 
 dev_dependencies:
+  test: ">=1.24.0"
   sqflite_common_ffi: ">=2.3.4"
   flutter_test:
     sdk: flutter

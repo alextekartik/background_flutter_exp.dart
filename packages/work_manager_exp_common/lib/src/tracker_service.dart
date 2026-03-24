@@ -158,7 +158,7 @@ class TrackerService {
 
     // initialise settings for both Android and iOS device.
     var settings = InitializationSettings(android: android, iOS: iOS);
-    flip.initialize(settings);
+    flip.initialize(settings: settings);
 
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
       'test',
@@ -174,10 +174,10 @@ class TrackerService {
       iOS: iOSPlatformChannelSpecifics,
     );
     await flip.show(
-      0,
-      'Notification $tag',
-      'workOnce notification',
-      platformChannelSpecifics,
+      id: 1,
+      title: 'Notification $tag',
+      body: 'workOnce notification',
+      notificationDetails: platformChannelSpecifics,
       //null
       // payload: 'Default_Sound'
     );

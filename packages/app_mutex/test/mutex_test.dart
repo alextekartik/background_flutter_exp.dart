@@ -38,6 +38,7 @@ Future<dynamic> _isolate2(dynamic _) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('mutex', () {
     test('one_mutex', () async {
       var mutex = Mutex('mutex');
