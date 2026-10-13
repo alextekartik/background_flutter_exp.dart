@@ -145,11 +145,17 @@ class MutexImpl implements Mutex {
 
   late final String clientId;
   MutexImpl(this.name, {String? clientId}) {
-    this.clientId = nanoid();
+    this.clientId = clientId ?? nanoid();
   }
 
   SendPort? _sendPort;
+
+  /// The cast is done outside the retry loop, a type error fails.
   Future<T> _send<T>(Object? param) async {
+    return (await _sendRaw(param)) as T;
+  }
+
+  Future<Object?> _sendRaw(Object? param) async {
     while (true) {
       try {
         var sendPort = _sendPort ??= await _getMutexIsolateSendPort();
@@ -157,8 +163,7 @@ class MutexImpl implements Mutex {
         final rp = ReceivePort();
         var responseFuture = rp.first;
         sendPort.send([rp.sendPort, if (param is List) ...param else param]);
-        var response = await responseFuture.timeout(_timeout);
-        return response as T;
+        return await responseFuture.timeout(_timeout);
       } catch (e) {
         if (_log.on) {
           _log.warning('$e command $param failed, try again');
@@ -179,17 +184,19 @@ class MutexImpl implements Mutex {
 
       if (lookup != null) {
         final receivePort = ReceivePort();
+        // A single listen, waited twice
+        var pingFuture = receivePort.first;
         lookup.send([receivePort.sendPort, pingCommand]);
 
         // First try with a 10ms timeout
         try {
-          await receivePort.first.timeout(_shortTimeout);
+          await pingFuture.timeout(_shortTimeout);
           return lookup;
         } catch (_) {}
 
         // 1 second timeout
         try {
-          await receivePort.first.timeout(_timeout);
+          await pingFuture.timeout(_timeout);
           return lookup;
         } catch (e) {
           if (_log.on) {
@@ -265,7 +272,7 @@ class MutexImpl implements Mutex {
     Duration? timeout,
   }) async {
     try {
-      await acquire(cancel: cancel);
+      await acquire(cancel: cancel, timeout: timeout);
       return await action(this);
     } finally {
       try {

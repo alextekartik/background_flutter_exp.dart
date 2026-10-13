@@ -59,7 +59,12 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
   }().unawait();
 
   print('Workmanager starting serviceRun $tag');
-  await service.workOnce(tag: tag);
+  try {
+    await service.workOnce(tag: tag);
+  } finally {
+    // stop polling the cancel request
+    done = true;
+  }
 
   print('Workmanager ending serviceRun $tag');
 }
