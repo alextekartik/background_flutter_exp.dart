@@ -1,10 +1,13 @@
-App cross isolate mutex
+# tekartik_app_flutter_mutex
 
-## General
+A mutex shared by the isolates of a Flutter application process (UI isolate,
+`compute`/`Isolate.run` workers, a background engine such as a WorkManager
+task), plus a small shared key/value store. A mutex is identified by its
+name, registered in the `IsolateNameServer` of `dart:ui`.
 
-Basic cross isolate mutex.
+## Getting started
 
-### Setup
+The package is not on pub.dev, add it as a git dependency:
 
 ```yaml
 dependencies:
@@ -13,56 +16,54 @@ dependencies:
       url: https://github.com/alextekartik/background_flutter_exp.dart
       ref: main
       path: packages/app_mutex
-    version: '>=0.2.2'
+    version: '>=0.2.3'
 ```
 
-### Usage
-
-A mutex must have a unique name for a given process
-
 ```dart
-/// The service port name.
-var _portName = 'MyService';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:tekartik_app_flutter_mutex/mutex.dart';
 
-/// The service entry point.
-void myBgIsolate(SendPort callerSendPort) {
-  print('testBgIsolate');
-  final receivePort = initIsolate(callerSendPort, _portName);
-
-  var service = MyService();
-  if (receivePort == null) {
-    return;
-  }
-  receivePort.listen((msg) async {
-    WidgetsFlutterBinding.ensureInitialized();
-    var command = ServiceCommandIn.fromEncodable(msg);
-
-    dynamic result = await service.onCommand(command.method, command.param);
-    command.sendPort.send(result);
+/// Adds one to a counter shared by all the isolates, one at a time.
+Future<int> addOne(String _) async {
+  var mutex = Mutex('example_counter');
+  return await mutex.synchronized((mutex) async {
+    var value = await mutex.getData<int?>('counter') ?? 0;
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    await mutex.setData('counter', value + 1);
+    return value + 1;
   });
 }
 
-/// The service implementation
-class MyService extends AppBgServiceBase {
-  @override
-  Future<Object?> onCommand(String method, Object? param) async {
-    switch (method) {
-
-    /// Your must implement support for this command
-      case servicePingMethod:
-        return param;
-      default:
-        throw UnimplementedError();
-    }
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Future.wait([for (var i = 0; i < 4; i++) compute(addOne, '$i')]);
+  print(await Mutex('example_counter').getData<int>('counter')); // 4
 }
 ```
 
-Then each client must find the isolate to send command to using:
+([example/main.dart](example/main.dart))
 
-```dart
-var isolate = (await BgIsolate.instance(
-        context: BgIsolateContext(name: _portName, isolateFn: myBgIsolate)))!;
-/// Try the generic ping command
-await isolate.sendCommand(servicePingMethod);
-```
+Platforms: Flutter on Android, iOS, macOS, Linux and Windows (`dart:ui`), in
+one process. Not the web, not a plain Dart program, not across processes.
+
+## API
+
+| Member | Does |
+|---|---|
+| `Mutex(name, {clientId})` | a client of the mutex `name`; each object is one holder (its own `clientId`) |
+| `acquire({cancel, timeout})` | waits (polling every 100 ms) until this client holds it; throws a `MutexException` (`cancelled`, `timeout`) |
+| `release()` | releases it; throws a `MutexException` (`notAcquired`) when this client does not hold it |
+| `synchronized(action, {cancel, timeout})` | acquire, run `action`, release (also on error) |
+| `setData(key, value)`, `getData<T>(key)` | shared values (null removes); a value must be sendable to another isolate |
+
+## Common pitfalls
+
+* Not reentrant: calling `acquire` (or `synchronized`) again on the object
+  that holds the mutex waits for itself, until its `timeout`.
+* `getData<int>` of a missing key throws a `TypeError`: ask `getData<int?>`.
+* The mutex state lives in an isolate spawned by the first client: if that
+  isolate dies with its engine (a background engine destroyed), the lock and
+  the data are lost and the next call starts a new one: the holder's
+  `release` then throws `notAcquired`.
+* `timeout` only bounds the wait for another holder.

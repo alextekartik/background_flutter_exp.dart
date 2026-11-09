@@ -69,4 +69,34 @@ void main() {
       fake.close();
     }
   });
+
+  test('dead mutex isolate found by two clients 500ms apart', () async {
+    const name = 'm_dead_race';
+    // A dead mutex isolate: its port is still registered, nothing answers.
+    final dead = ReceivePort();
+    final deadSendPort = dead.sendPort;
+    dead.close();
+    IsolateNameServer.removePortNameMapping(name);
+    IsolateNameServer.registerPortWithName(deadSendPort, name);
+    try {
+      final m1 = Mutex(name);
+      final m2 = Mutex(name);
+      // m1 replaces the dead isolate after its ping timeout (~1 s).
+      final f1 = m1.acquire();
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      var m2Acquired = false;
+      final f2 = m2.acquire().then((_) => m2Acquired = true);
+      await f1.timeout(const Duration(seconds: 5));
+      // m2 looked up the dead port too, its ping times out at ~1.5 s: it
+      // must not remove the new isolate of m1 (two holders).
+      await Future<void>.delayed(const Duration(milliseconds: 2500));
+      expect(m2Acquired, isFalse, reason: 'm1 holds the mutex');
+      await m1.release();
+      await f2.timeout(const Duration(seconds: 5));
+      expect(m2Acquired, isTrue);
+      await m2.release();
+    } finally {
+      IsolateNameServer.removePortNameMapping(name);
+    }
+  }, timeout: const Timeout(Duration(seconds: 30)));
 }

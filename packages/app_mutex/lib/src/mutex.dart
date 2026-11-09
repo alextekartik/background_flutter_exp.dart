@@ -31,34 +31,47 @@ class Log {
 
 var _log = Log();
 
-/// Cross isolate mutex
+/// Cross isolate mutex of a Flutter application process (`dart:ui`
+/// `IsolateNameServer`), with shared data.
+///
+/// Each object is one client (one possible holder); it is not reentrant.
 abstract class Mutex {
+  /// A client of the mutex [name] (unique for the process). [clientId]
+  /// identifies the holder, a random one by default.
   factory Mutex(String name, {String? clientId}) =>
       MutexImpl(name, clientId: clientId);
+
+  /// The mutex name.
   String get name;
 
-  /// Acquire
+  /// Waits until this client holds the mutex, checking every 100 ms.
   ///
-  /// if timeout is reached both cancelled and timeout is set in the exception
+  /// Throws a [MutexException] when [cancel] returns true (`cancelled`) or
+  /// after [timeout] (`timeout` and `cancelled`) while another client holds
+  /// it.
   Future<void> acquire({bool Function()? cancel, Duration? timeout});
 
-  /// Release
+  /// Releases the mutex; throws a [MutexException] (`notAcquired`) when
+  /// this client does not hold it.
   Future<void> release();
 
-  /// Used as a lock.
+  /// Runs [action] holding the mutex (see [acquire]), released afterwards,
+  /// also on error.
   Future<T> synchronized<T>(
     FutureOr<T> Function(Mutex mutex) action, {
     bool Function()? cancel,
     Duration? timeout,
   });
 
-  /// Set some shared data.
+  /// Sets the shared value of [key] (null removes it). [data] must be
+  /// sendable to another isolate.
   Future<void> setData<T>(String key, T data);
 
   /// Listen to shared data changes
   //Stream<T> onData<T>(String key)
 
-  /// Get some shared data.
+  /// Gets the shared value of [key]; a missing key is null (a [TypeError]
+  /// for a non nullable [T]).
   Future<T> getData<T>(String key);
 }
 
@@ -207,6 +220,12 @@ class MutexImpl implements Mutex {
           try {
             lookup.send(killCommand);
           } catch (_) {}
+          // Another client may have replaced the dead isolate meanwhile:
+          // remove the name only if it still points to the dead one,
+          // otherwise use the new one.
+          if (IsolateNameServer.lookupPortByName(name) != lookup) {
+            continue;
+          }
           IsolateNameServer.removePortNameMapping(name);
         }
       }
@@ -305,9 +324,16 @@ class MutexImpl implements Mutex {
 
 /// Mutex exception during acquired.
 class MutexException implements Exception {
+  /// [Mutex.acquire] stopped by its `cancel` callback or its timeout.
   final bool cancelled;
+
+  /// [Mutex.acquire] stopped by its timeout.
   final bool timeout;
+
+  /// [Mutex.release] called by a client that does not hold the mutex.
   final bool notAcquired;
+
+  /// The message.
   final String message;
 
   MutexException._({
