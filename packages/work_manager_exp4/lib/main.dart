@@ -44,17 +44,28 @@ void requestNotificationPermissions() {
 /// - performs in loops
 ///   - http fetch
 ///   - sqflite transaction
-Future<void> serviceBgRun(TrackerService service, String tag) async {
+/// Interval between two reads of the main request in [serviceBgRun].
+const mainRequestPollInterval = Duration(milliseconds: 500);
+
+/// Runs [service] work once in the background, stopping early when the main
+/// isolate requests it (`mainRequestKeyName` shared data of [mutex], the
+/// [mutexName] mutex by default).
+Future<void> serviceBgRun(
+  TrackerService service,
+  String tag, {
+  Mutex? mutex,
+}) async {
   //var client = TrackerServiceClient();
-  var mutex = Mutex(mutexName);
+  var mainMutex = mutex ?? Mutex(mutexName);
   var done = false;
 
   // Handle cancel when main request it
   () async {
     while (!done) {
-      if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
+      if (await mainMutex.getData<Object?>(mainRequestKeyName) == true) {
         service.isKilled = true;
       }
+      await Future<void>.delayed(mainRequestPollInterval);
     }
   }().unawait();
 
@@ -149,6 +160,20 @@ Future<void> main() async {
   }().unawait();
 
   gPushMessagingService = PushMessagingService();
+  await initLocalNotifications();
+  () async {
+    try {
+      await gPushMessagingService.init();
+    } catch (e) {
+      debugPrint('push amessaging init failed $e');
+    }
+  }().unawait();
+  runApp(const MyApp());
+}
+
+/// Initializes the local notifications ([gFlutterLocalNotificationsPlugin]):
+/// a notification tapped while the app runs goes to [onNotificationResponse].
+Future<void> initLocalNotifications() async {
   const initializationSettingsAndroid = AndroidInitializationSettings(
     'ic_notification',
   );
@@ -165,32 +190,30 @@ Future<void> main() async {
   if (payload != null) {
     gSelectNotificationSubject.add(payload);
   }
+  // A tap while the app runs (main isolate). A background callback would
+  // need a top-level `@pragma('vm:entry-point')` function, run in another
+  // isolate where these subjects are not the UI ones.
   await gFlutterLocalNotificationsPlugin.initialize(
     settings: initializationSettings,
-    onDidReceiveBackgroundNotificationResponse:
-        (NotificationResponse? response) async {
-          var payload = response?.payload;
-          if (payload != null) {
-            gSelectNotificationSubject.add(payload);
-          } else {
-            debugPrint('notification payload null');
-          }
-          debugPrint('notification payload: $payload');
-          Model data;
-          try {
-            data = asModel(jsonDecode(payload!) as Map);
-          } catch (_) {
-            data = newModel();
-          }
-          gAppNotificationSubject.add(data);
-        },
+    onDidReceiveNotificationResponse: onNotificationResponse,
   );
-  () async {
-    try {
-      await gPushMessagingService.init();
-    } catch (e) {
-      debugPrint('push amessaging init failed $e');
-    }
-  }().unawait();
-  runApp(const MyApp());
+}
+
+/// A tapped notification: its payload goes to [gSelectNotificationSubject]
+/// and, decoded, to [gAppNotificationSubject].
+void onNotificationResponse(NotificationResponse? response) {
+  var payload = response?.payload;
+  if (payload != null) {
+    gSelectNotificationSubject.add(payload);
+  } else {
+    debugPrint('notification payload null');
+  }
+  debugPrint('notification payload: $payload');
+  Model data;
+  try {
+    data = asModel(jsonDecode(payload!) as Map);
+  } catch (_) {
+    data = newModel();
+  }
+  gAppNotificationSubject.add(data);
 }

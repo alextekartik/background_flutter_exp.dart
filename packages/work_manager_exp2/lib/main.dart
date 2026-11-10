@@ -19,11 +19,21 @@ const runOnceTaskName = 'runOnceTask';
 
 var _id = 0;
 
-Future<void> serviceBgRun(TrackerService service, String tag) async {
+/// Interval between two reads of the main request in [serviceBgRun].
+const mainRequestPollInterval = Duration(milliseconds: 500);
+
+/// Runs [service] work once in the background, stopping early when the main
+/// isolate requests it (`mainRequestKeyName` shared data of [mutex], the
+/// [mutexName] mutex by default).
+Future<void> serviceBgRun(
+  TrackerService service,
+  String tag, {
+  Mutex? mutex,
+}) async {
   //var client = TrackerServiceClient();
-  var mutex = Mutex(mutexName);
+  var mainMutex = mutex ?? Mutex(mutexName);
   var done = false;
-  await mutex.synchronized(
+  await mainMutex.synchronized(
     (mutex) async {
       // Handle cancel when main request it
       () async {
@@ -31,6 +41,7 @@ Future<void> serviceBgRun(TrackerService service, String tag) async {
           if (await mutex.getData<Object?>(mainRequestKeyName) == true) {
             service.isKilled = true;
           }
+          await Future<void>.delayed(mainRequestPollInterval);
         }
       }().unawait();
 

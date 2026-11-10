@@ -4,7 +4,7 @@ Background task, background isolate, background fetch flutter experiments
 
 | Package | Notes |
 | ---- | ---- |
-| [work_manager_exp4](packages/work_manager_exp3) | Work manager flutter app experiment 4, global mutex on database access, background fetch and FCM support|
+| [work_manager_exp4](packages/work_manager_exp4) | Work manager flutter app experiment 4, global mutex on database access, background fetch and FCM support|
 | [app_mutex](packages/app_mutex) | Cross isolate mutex |
 
 ## Obsolete

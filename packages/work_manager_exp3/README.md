@@ -16,5 +16,14 @@ A global mutex protects database operation.
 # Dependencies:
 
 - workmanager: for background operation every 15mn
-- sqflite_common_ffi/sqlite3_flutter_libs for database operation
+- sqflite (Android, iOS, macOS) and sqflite_common_ffi (Linux, Windows) for database operation
 - flutter_local_notification: for notifications
+
+## Android build
+
+The `android/` project still applies the Flutter Gradle plugin the old way
+(`apply from: .../flutter.gradle`, Gradle 6.7): current Flutter versions
+refuse it ("You are applying Flutter's main Gradle plugin imperatively"), so
+it does not build for Android until `android/` is regenerated
+(`flutter create --platforms android .`) and its manifest, workmanager
+(and Firebase) settings ported.

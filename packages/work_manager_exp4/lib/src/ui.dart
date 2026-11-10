@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppNotification(
       child: MaterialApp(
+        navigatorKey: gNavigatorKey,
         title: 'Background task tracker',
         theme: ThemeData.dark(
           // This is the theme of your application.

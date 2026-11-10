@@ -41,8 +41,11 @@ class _AppNotificationState extends State<AppNotification> {
   }
 }
 
+/// Shows a fresh home screen. [context] can be above the app navigator (as
+/// the one of [AppNotification]): [gNavigatorKey] is used then.
 void popAllAndGoToHomeScreen(BuildContext context) {
-  Navigator.of(context).pushAndRemoveUntil(
+  var navigator = Navigator.maybeOf(context) ?? gNavigatorKey.currentState;
+  navigator?.pushAndRemoveUntil(
     MaterialPageRoute<void>(builder: (_) => const TrackItemListPage()),
     (route) => false,
   );

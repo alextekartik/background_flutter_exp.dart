@@ -18,7 +18,7 @@ A global mutex protects database operation.
 ## Setup
 
 - Create a firebase project
-- Generate a keystore `keystore.jk` in `android/app`
+- Generate a keystore `keystore.jks` in `android/app`
 - Create `key.properties` file in `android/app`
 ```shell
 keyAlias=app
@@ -28,11 +28,19 @@ storePassword=<your password>
 
 ```
 - In firebase, create an android app with proper information and required SHA1 for push to work
-- Download 'google-services.json' to `android/app/src`
+- Download `google-services.json` to `android/app`
 
 ## Dependencies:
 
 - workmanager: for background operation every 15mn
-- sqflite_common_ffi/sqlite3_flutter_libs for database operation
+- sqflite (Android, iOS, macOS) and sqflite_common_ffi (Linux, Windows) for database operation
 - flutter_local_notification: for notifications
 
+## Android build
+
+The `android/` project still applies the Flutter Gradle plugin the old way
+(`apply from: .../flutter.gradle`, Gradle 6.7): current Flutter versions
+refuse it ("You are applying Flutter's main Gradle plugin imperatively"), so
+it does not build for Android until `android/` is regenerated
+(`flutter create --platforms android .`) and its manifest, workmanager
+(and Firebase) settings ported.
