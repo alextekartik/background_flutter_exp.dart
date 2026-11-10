@@ -119,7 +119,7 @@ class TrackerService {
   Future<ItemList> getListItems() async {
     return await dbSynchronized(() async {
       var db = await _database;
-      return await db.transaction((txn) async {
+      var list = await db.transaction((txn) async {
         var lastId = await _getLastId(txn);
         var result = await txn.query(
           itemTable,
@@ -134,6 +134,13 @@ class TrackerService {
         var list = ItemList(modelList, lastId);
         return list;
       });
+      // Rows written by another isolate (the background work), or none left
+      // after a clear (-1 published): publish the id read, so that waiting
+      // for a change after this list does not complete at once.
+      if (list.lastChangeId != itemUpdated.value) {
+        itemUpdated.add(list.lastChangeId);
+      }
+      return list;
     });
   }
 
